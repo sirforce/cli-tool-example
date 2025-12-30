@@ -984,13 +984,19 @@ export function executeOperation(
   
   // Check if operation is unary (requires exactly 1 argument)
   if (isUnaryOperation(operation)) {
-    if (args.length !== 1) {
-      throw new Error('Exactly 1 number is required');
-    }
+      // Special error message for eval operation
+      if (operation === 'eval') {
+        if (args.length !== 1) {
+          throw new Error('Exactly 1 expression string is required');
+        }
+      } else if (args.length !== 1) {
+        throw new Error('Exactly 1 number is required');
+      }
     
-    // Handle "from" operations that accept strings
+    // Handle "from" operations and "eval" operation that accept strings
     const isFromOperation = operation === 'frombinary' || operation === 'fromhex' || operation === 'fromoctal';
-    if (isFromOperation) {
+    const isEvalOperation = operation === 'eval';
+    if (isFromOperation || isEvalOperation) {
       const result = operationFn(args[0] as string);
       return {
         result,

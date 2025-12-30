@@ -15,7 +15,7 @@ const program = new Command();
 
 program
   .name('calc')
-  .description('A CLI tool for basic mathematical operations')
+  .description('A comprehensive CLI tool for mathematical operations including arithmetic, statistics, unit conversions, expression evaluation, and batch processing')
   .version('1.0.0')
   .allowUnknownOption(true) // Allow negative numbers to be parsed as arguments
   .argument('<operation>', `Operation to perform: ${getAvailableOperations().join(', ')}`)
@@ -83,13 +83,13 @@ program
 // Add batch command
 program
   .command('batch')
-  .description('Perform operations on numbers from a file')
-  .argument('<operation>', 'Operation to perform')
+  .description('Perform operations on numbers from a file. Supports text files (space or custom delimited), CSV files, and JSON files. Only operations that accept multiple arguments are supported.')
+  .argument('<operation>', `Operation to perform (must support multiple arguments): ${getAvailableOperations().filter(op => !isUnaryOperation(op)).join(', ')}`)
   .argument('<file_path>', 'Path to file containing numbers')
-  .option('--format <format>', 'File format: text, csv, or json', 'text')
-  .option('--column <column>', 'CSV column index (0-based) or column name')
-  .option('--field <field>', 'JSON field name for object arrays')
-  .option('--delimiter <delimiter>', 'Text file delimiter character', ' ')
+  .option('--format <format>', 'File format: text, csv, or json. If not specified, auto-detects from file extension (.csv, .json, or default to text)')
+  .option('--column <column>', 'CSV column index (0-based) or column name. Required for CSV files with multiple columns.')
+  .option('--field <field>', 'JSON field name for object arrays. Required for JSON files containing arrays of objects.')
+  .option('--delimiter <delimiter>', 'Text file delimiter character (default: space). Use for text files with custom separators like comma or tab.', ' ')
   .action((operation: string, filePath: string, options: any) => {
     try {
       // Validate operation
@@ -137,9 +137,14 @@ program.addHelpText('after', () => {
   
   helpText += '\nBatch Operations:\n';
   helpText += '\n  batch         Perform operations on numbers from a file\n';
-  helpText += '                 Example: calc batch sum numbers.txt\n';
-  helpText += '                 Example: calc batch mean data.csv --format csv --column value\n';
-  helpText += '                 Example: calc batch max values.json --format json --field value\n';
+  helpText += '                 Supports text, CSV, and JSON file formats\n';
+  helpText += '                 Only operations that accept multiple arguments are supported\n';
+  helpText += '                 \n';
+  helpText += '                 Examples:\n';
+  helpText += '                   calc batch sum numbers.txt\n';
+  helpText += '                   calc batch mean data.csv --format csv --column 2\n';
+  helpText += '                   calc batch max values.json --format json --field value\n';
+  helpText += '                   calc batch stddev data.txt --delimiter ","\n';
   
   return helpText;
 });
