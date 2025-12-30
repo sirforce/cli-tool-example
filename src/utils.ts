@@ -50,8 +50,15 @@ export const parseNumbersArray = (numberStrings: string[], minCount: number = 2)
 /**
  * Format operation result for display
  */
-export const formatResult = (operation: string, result: number): string => {
+export const formatResult = (operation: string, result: number, modes?: number[]): string => {
   const operationName = operation.charAt(0).toUpperCase() + operation.slice(1);
+  
+  // Special handling for mode operation with multiple modes
+  if (operation === 'mode' && modes && modes.length > 1) {
+    const modesStr = modes.join(', ');
+    return `${operationName} Math Result: ${modesStr}`;
+  }
+  
   return `${operationName} Math Result: ${result}`;
 };
 

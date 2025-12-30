@@ -24,6 +24,7 @@ export type Operation = BinaryOperation | UnaryOperation | NAryOperation;
 export interface OperationResult {
   result: number;
   operation: string;
+  modes?: number[]; // For mode operation when multiple modes exist
 }
 
 /**
@@ -114,6 +115,30 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Round a number to the nearest integer',
     example: 'calc round 4.7',
   },
+  mean: {
+    description: 'Calculate the arithmetic mean (average) of multiple numbers',
+    example: 'calc mean 2 4 6',
+  },
+  median: {
+    description: 'Find the median value from multiple numbers',
+    example: 'calc median 1 3 5',
+  },
+  mode: {
+    description: 'Find the most frequent value(s) from multiple numbers',
+    example: 'calc mode 1 2 2 3',
+  },
+  stddev: {
+    description: 'Calculate the population standard deviation of multiple numbers',
+    example: 'calc stddev 2 4 6',
+  },
+  variance: {
+    description: 'Calculate the population variance of multiple numbers',
+    example: 'calc variance 2 4 6',
+  },
+  range: {
+    description: 'Calculate the range (max - min) of multiple numbers',
+    example: 'calc range 1 5 3',
+  },
 };
 
 /**
@@ -125,7 +150,7 @@ const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'a
  * Set of n-ary operations (require 2+ arguments)
  * All operations now support multiple parameters
  */
-const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min']);
+const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min', 'mean', 'median', 'mode', 'stddev', 'variance', 'range']);
 
 /**
  * Mathematical operations
@@ -262,6 +287,76 @@ export const operations: Record<string, ((...args: number[]) => number)> = {
   round: (num: number): number => {
     return Math.round(num);
   },
+
+  // Statistical operations (require 2+ arguments)
+  mean: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+    const sum = numbers.reduce((acc, num) => acc + num, 0);
+    return sum / numbers.length;
+  },
+
+  median: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+    const sorted = [...numbers].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 0) {
+      return (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+    return sorted[mid];
+  },
+
+  mode: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+    const frequency: Map<number, number> = new Map();
+    
+    // Count frequency of each number
+    numbers.forEach(num => {
+      frequency.set(num, (frequency.get(num) || 0) + 1);
+    });
+    
+    // Find maximum frequency
+    const maxFreq = Math.max(...Array.from(frequency.values()));
+    
+    // Get all numbers with maximum frequency
+    const modes = Array.from(frequency.entries())
+      .filter(([_, freq]) => freq === maxFreq)
+      .map(([num, _]) => num);
+    
+    // Return first mode (for backward compatibility), modes array will be handled in executeOperation
+    return modes[0];
+  },
+
+  stddev: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+    const mean = numbers.reduce((acc, num) => acc + num, 0) / numbers.length;
+    const variance = numbers.reduce((acc, num) => acc + Math.pow(num - mean, 2), 0) / numbers.length;
+    return Math.sqrt(variance);
+  },
+
+  variance: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+    const mean = numbers.reduce((acc, num) => acc + num, 0) / numbers.length;
+    return numbers.reduce((acc, num) => acc + Math.pow(num - mean, 2), 0) / numbers.length;
+  },
+
+  range: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+    const max = Math.max(...numbers);
+    const min = Math.min(...numbers);
+    return max - min;
+  },
 };
 
 /**
@@ -350,6 +445,28 @@ export function executeOperation(
   
   const nAryFn = operationFn as NAryOperation;
   const result = nAryFn(...args);
+  
+  // Special handling for mode operation to return modes array
+  if (operation === 'mode') {
+    const frequency: Map<number, number> = new Map();
+    args.forEach(num => {
+      frequency.set(num, (frequency.get(num) || 0) + 1);
+    });
+    const maxFreq = Math.max(...Array.from(frequency.values()));
+    const modes = Array.from(frequency.entries())
+      .filter(([_, freq]) => freq === maxFreq)
+      .map(([num, _]) => num)
+      .sort((a, b) => a - b); // Sort for consistent output
+    
+    // Return modes array if: multiple modes exist, or all values are unique (all have frequency 1)
+    const shouldReturnModes = modes.length > 1 || (modes.length === frequency.size && maxFreq === 1 && args.length > 1);
+    
+    return {
+      result,
+      operation,
+      modes: shouldReturnModes ? modes : undefined,
+    };
+  }
   
   return {
     result,

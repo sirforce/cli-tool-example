@@ -8,6 +8,7 @@ import {
   getOperationExample,
   getAllOperationsWithDescriptions,
 } from './operations';
+import { parseNumbersArray } from './utils';
 
 describe('operations', () => {
   describe('basic operations', () => {
@@ -614,6 +615,279 @@ describe('operations', () => {
 
     it('should throw error for too many arguments on unary operation', () => {
       expect(() => executeOperation('sqrt', 4, 9)).toThrow();
+    });
+  });
+
+  // ============================================================================
+  // Spec 003: Statistical Operations
+  // ============================================================================
+
+  // Test Suite 1: Mean Operation
+  describe('mean operation', () => {
+    it('should calculate mean with two numbers (Test 1.1)', () => {
+      const result = executeOperation('mean', 2, 4);
+      expect(result.result).toBe(3);
+      expect(result.operation).toBe('mean');
+    });
+
+    it('should calculate mean with three numbers (Test 1.2)', () => {
+      const result = executeOperation('mean', 2, 4, 6);
+      expect(result.result).toBe(4);
+    });
+
+    it('should calculate mean with multiple numbers (Test 1.3)', () => {
+      const result = executeOperation('mean', 1, 2, 3, 4, 5);
+      expect(result.result).toBe(3);
+    });
+
+    it('should calculate mean with decimal numbers (Test 1.4)', () => {
+      const result = executeOperation('mean', 1.5, 2.5, 3.5);
+      expect(result.result).toBe(2.5);
+    });
+
+    it('should calculate mean with negative numbers (Test 1.5)', () => {
+      const result = executeOperation('mean', -2, 0, 2);
+      expect(result.result).toBe(0);
+    });
+
+    it('should throw error with single number (Test 1.6)', () => {
+      expect(() => executeOperation('mean', 5)).toThrow('At least 2 numbers are required');
+    });
+
+    it('should calculate mean with all same numbers (Test 1.7)', () => {
+      const result = executeOperation('mean', 5, 5, 5, 5);
+      expect(result.result).toBe(5);
+    });
+  });
+
+  // Test Suite 2: Median Operation
+  describe('median operation', () => {
+    it('should calculate median with odd number of values (Test 2.1)', () => {
+      const result = executeOperation('median', 1, 3, 5);
+      expect(result.result).toBe(3);
+      expect(result.operation).toBe('median');
+    });
+
+    it('should calculate median with even number of values (Test 2.2)', () => {
+      const result = executeOperation('median', 1, 2, 3, 4);
+      expect(result.result).toBe(2.5);
+    });
+
+    it('should calculate median with unsorted values (Test 2.3)', () => {
+      const result = executeOperation('median', 5, 2, 8, 1, 9);
+      expect(result.result).toBe(5);
+    });
+
+    it('should calculate median with two numbers (Test 2.4)', () => {
+      const result = executeOperation('median', 3, 7);
+      expect(result.result).toBe(5);
+    });
+
+    it('should calculate median with decimal numbers (Test 2.5)', () => {
+      const result = executeOperation('median', 1.5, 2.5, 3.5, 4.5);
+      expect(result.result).toBe(3);
+    });
+
+    it('should calculate median with negative numbers (Test 2.6)', () => {
+      const result = executeOperation('median', -5, -1, -3);
+      expect(result.result).toBe(-3);
+    });
+
+    it('should calculate median with duplicate values (Test 2.7)', () => {
+      const result = executeOperation('median', 2, 2, 5, 5, 8);
+      expect(result.result).toBe(5);
+    });
+
+    it('should throw error with single number (Test 2.8)', () => {
+      expect(() => executeOperation('median', 5)).toThrow('At least 2 numbers are required');
+    });
+  });
+
+  // Test Suite 3: Mode Operation
+  describe('mode operation', () => {
+    it('should find single mode (Test 3.1)', () => {
+      const result = executeOperation('mode', 1, 2, 2, 3);
+      expect(result.result).toBe(2);
+      expect(result.operation).toBe('mode');
+    });
+
+    it('should find multiple modes (Test 3.2)', () => {
+      const result = executeOperation('mode', 1, 1, 2, 2, 3);
+      expect(result.modes).toBeDefined();
+      expect(result.modes).toContain(1);
+      expect(result.modes).toContain(2);
+      expect(result.modes?.length).toBe(2);
+    });
+
+    it('should find mode when all values are same (Test 3.3)', () => {
+      const result = executeOperation('mode', 5, 5, 5);
+      expect(result.result).toBe(5);
+    });
+
+    it('should handle no mode - all unique values (Test 3.4)', () => {
+      const result = executeOperation('mode', 1, 2, 3, 4, 5);
+      // When all values are unique, all should be returned as modes
+      expect(result.modes).toBeDefined();
+      expect(result.modes?.length).toBe(5);
+      expect(result.modes).toContain(1);
+      expect(result.modes).toContain(2);
+      expect(result.modes).toContain(3);
+      expect(result.modes).toContain(4);
+      expect(result.modes).toContain(5);
+    });
+
+    it('should find mode with decimal numbers (Test 3.5)', () => {
+      const result = executeOperation('mode', 1.5, 1.5, 2.5, 3.5);
+      expect(result.result).toBe(1.5);
+    });
+
+    it('should find three modes (Test 3.6)', () => {
+      const result = executeOperation('mode', 1, 1, 2, 2, 3, 3, 4);
+      expect(result.modes).toBeDefined();
+      expect(result.modes).toContain(1);
+      expect(result.modes).toContain(2);
+      expect(result.modes).toContain(3);
+      expect(result.modes?.length).toBe(3);
+    });
+
+    it('should throw error with single number (Test 3.7)', () => {
+      expect(() => executeOperation('mode', 5)).toThrow('At least 2 numbers are required');
+    });
+  });
+
+  // Test Suite 4: Standard Deviation Operation
+  describe('stddev operation', () => {
+    it('should calculate standard deviation with two numbers (Test 4.1)', () => {
+      const result = executeOperation('stddev', 2, 4);
+      expect(result.result).toBe(1);
+      expect(result.operation).toBe('stddev');
+    });
+
+    it('should calculate standard deviation with three numbers (Test 4.2)', () => {
+      const result = executeOperation('stddev', 2, 4, 6);
+      expect(result.result).toBeCloseTo(1.632993161855452, 10);
+    });
+
+    it('should calculate standard deviation with same numbers (Test 4.3)', () => {
+      const result = executeOperation('stddev', 5, 5, 5);
+      expect(result.result).toBe(0);
+    });
+
+    it('should calculate standard deviation with multiple numbers (Test 4.4)', () => {
+      const result = executeOperation('stddev', 1, 2, 3, 4, 5);
+      expect(result.result).toBeCloseTo(1.4142135623730951, 10);
+    });
+
+    it('should calculate standard deviation with decimal numbers (Test 4.5)', () => {
+      const result = executeOperation('stddev', 1.5, 2.5, 3.5);
+      expect(result.result).toBeCloseTo(0.816496580927726, 10);
+    });
+
+    it('should calculate standard deviation with negative numbers (Test 4.6)', () => {
+      const result = executeOperation('stddev', -2, 0, 2);
+      expect(result.result).toBeCloseTo(1.632993161855452, 10);
+    });
+
+    it('should throw error with single number (Test 4.7)', () => {
+      expect(() => executeOperation('stddev', 5)).toThrow('At least 2 numbers are required');
+    });
+  });
+
+  // Test Suite 5: Variance Operation
+  describe('variance operation', () => {
+    it('should calculate variance with two numbers (Test 5.1)', () => {
+      const result = executeOperation('variance', 2, 4);
+      expect(result.result).toBe(1);
+      expect(result.operation).toBe('variance');
+    });
+
+    it('should calculate variance with three numbers (Test 5.2)', () => {
+      const result = executeOperation('variance', 2, 4, 6);
+      expect(result.result).toBeCloseTo(2.6666666666666665, 10);
+    });
+
+    it('should calculate variance with same numbers (Test 5.3)', () => {
+      const result = executeOperation('variance', 5, 5, 5);
+      expect(result.result).toBe(0);
+    });
+
+    it('should calculate variance - relationship to stddev (Test 5.4)', () => {
+      const result = executeOperation('variance', 1, 2, 3, 4, 5);
+      expect(result.result).toBe(2);
+    });
+
+    it('should calculate variance with decimal numbers (Test 5.5)', () => {
+      const result = executeOperation('variance', 1.5, 2.5, 3.5);
+      expect(result.result).toBeCloseTo(0.6666666666666666, 10);
+    });
+
+    it('should throw error with single number (Test 5.6)', () => {
+      expect(() => executeOperation('variance', 5)).toThrow('At least 2 numbers are required');
+    });
+  });
+
+  // Test Suite 6: Range Operation
+  describe('range operation', () => {
+    it('should calculate basic range (Test 6.1)', () => {
+      const result = executeOperation('range', 1, 5, 3);
+      expect(result.result).toBe(4);
+      expect(result.operation).toBe('range');
+    });
+
+    it('should calculate range with multiple numbers (Test 6.2)', () => {
+      const result = executeOperation('range', 10, 20, 15, 25);
+      expect(result.result).toBe(15);
+    });
+
+    it('should calculate range with same numbers (Test 6.3)', () => {
+      const result = executeOperation('range', 5, 5, 5);
+      expect(result.result).toBe(0);
+    });
+
+    it('should calculate range with negative numbers (Test 6.4)', () => {
+      const result = executeOperation('range', -5, -1, -3);
+      expect(result.result).toBe(4);
+    });
+
+    it('should calculate range with mixed positive and negative (Test 6.5)', () => {
+      const result = executeOperation('range', -5, 0, 5);
+      expect(result.result).toBe(10);
+    });
+
+    it('should calculate range with decimal numbers (Test 6.6)', () => {
+      const result = executeOperation('range', 1.5, 2.5, 3.5);
+      expect(result.result).toBe(2);
+    });
+
+    it('should throw error with single number (Test 6.7)', () => {
+      expect(() => executeOperation('range', 5)).toThrow('At least 2 numbers are required');
+    });
+  });
+
+  // Test Suite 7: Integration and Edge Cases
+  describe('statistical operations integration and edge cases', () => {
+    it('should handle large dataset (Test 7.1)', () => {
+      const result = executeOperation('mean', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+      expect(result.result).toBe(5.5);
+    });
+
+    it('should handle very small numbers (Test 7.2)', () => {
+      const result = executeOperation('mean', 0.001, 0.002, 0.003);
+      expect(result.result).toBe(0.002);
+    });
+
+    it('should handle very large numbers (Test 7.3)', () => {
+      const result = executeOperation('mean', 1000000, 2000000, 3000000);
+      expect(result.result).toBe(2000000);
+    });
+
+    it('should handle invalid number format (Test 7.4)', () => {
+      // This is tested at the parseNumbersArray level, but we can verify error handling
+      expect(() => parseNumbersArray(['5', 'abc', '3'], 2)).toThrow();
+    });
+
+    it('should handle empty arguments (Test 7.5)', () => {
+      expect(() => parseNumbersArray([], 2)).toThrow('At least 2 numbers are required');
     });
   });
 });

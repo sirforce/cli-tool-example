@@ -38,10 +38,10 @@ program
       const validatedNumbers = parseNumbersArray(numbers, minCount);
 
       // Execute operation
-      const { result, operation: op } = executeOperation(operation, ...validatedNumbers);
+      const { result, operation: op, modes } = executeOperation(operation, ...validatedNumbers);
 
       // Display result
-      console.log(formatResult(op, result));
+      console.log(formatResult(op, result, modes));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       console.error(`Error: ${errorMessage}`);
