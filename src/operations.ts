@@ -177,6 +177,14 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Calculate the number of ways to arrange k items from n items with regard to order (n permute k)',
     example: 'calc permute 5 2',
   },
+  gcd: {
+    description: 'Calculate the greatest common divisor of multiple numbers',
+    example: 'calc gcd 48 18',
+  },
+  lcm: {
+    description: 'Calculate the least common multiple of multiple numbers',
+    example: 'calc lcm 4 6',
+  },
 };
 
 /**
@@ -188,7 +196,7 @@ const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'a
  * Set of n-ary operations (require 2+ arguments)
  * All operations now support multiple parameters
  */
-const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min', 'mean', 'median', 'mode', 'stddev', 'variance', 'range', 'combine', 'permute']);
+const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min', 'mean', 'median', 'mode', 'stddev', 'variance', 'range', 'combine', 'permute', 'gcd', 'lcm']);
 
 /**
  * Validate that a number is a non-negative integer
@@ -567,6 +575,71 @@ export const operations: Record<string, ((...args: any[]) => number | string)> =
     }
     
     return bigIntToNumber(result);
+  },
+
+  // GCD and LCM operations
+  gcd: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+
+    // Helper function to calculate GCD of two numbers using Euclidean algorithm
+    const gcdTwo = (a: number, b: number): number => {
+      // Take absolute values and round to integers
+      a = Math.abs(Math.round(a));
+      b = Math.abs(Math.round(b));
+
+      // Handle zero cases
+      if (a === 0 && b === 0) {
+        throw new Error('GCD of (0, 0) is undefined');
+      }
+      if (a === 0) return b;
+      if (b === 0) return a;
+
+      // Euclidean algorithm
+      while (b !== 0) {
+        const temp = b;
+        b = a % b;
+        a = temp;
+      }
+      return a;
+    };
+
+    // Apply GCD pairwise: GCD(a, b, c) = GCD(GCD(a, b), c)
+    return numbers.reduce((acc, num) => gcdTwo(acc, num));
+  },
+
+  lcm: (...numbers: number[]): number => {
+    if (numbers.length < 2) {
+      throw new Error('At least 2 numbers are required');
+    }
+
+    // Helper function to calculate LCM of two numbers using GCD
+    const lcmTwo = (a: number, b: number): number => {
+      // Take absolute values and round to integers
+      a = Math.abs(Math.round(a));
+      b = Math.abs(Math.round(b));
+
+      // Handle zero case: LCM(0, n) = 0
+      if (a === 0 || b === 0) {
+        return 0;
+      }
+
+      // Use relationship: LCM(a, b) = |a * b| / GCD(a, b)
+      const gcd = (x: number, y: number): number => {
+        while (y !== 0) {
+          const temp = y;
+          y = x % y;
+          x = temp;
+        }
+        return x;
+      };
+
+      return Math.abs(a * b) / gcd(a, b);
+    };
+
+    // Apply LCM pairwise: LCM(a, b, c) = LCM(LCM(a, b), c)
+    return numbers.reduce((acc, num) => lcmTwo(acc, num));
   },
 };
 

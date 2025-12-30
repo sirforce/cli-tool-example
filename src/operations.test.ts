@@ -1342,5 +1342,170 @@ describe('operations', () => {
       expect(result.result).toBe(670442572800);
     });
   });
+
+  // ============================================================================
+  // Spec 007: GCD and LCM Operations
+  // ============================================================================
+
+  // Test Suite 1: GCD Operation
+  describe('gcd operation', () => {
+    it('should calculate basic GCD with two numbers (Test 1.1)', () => {
+      const result = executeOperation('gcd', 48, 18);
+      expect(result.result).toBe(6);
+      expect(result.operation).toBe('gcd');
+    });
+
+    it('should calculate GCD of coprime numbers (Test 1.2)', () => {
+      const result = executeOperation('gcd', 17, 19);
+      expect(result.result).toBe(1);
+    });
+
+    it('should calculate GCD with multiple numbers (Test 1.3)', () => {
+      const result = executeOperation('gcd', 12, 18, 24);
+      expect(result.result).toBe(6);
+    });
+
+    it('should calculate GCD when one number divides another (Test 1.4)', () => {
+      const result = executeOperation('gcd', 12, 6);
+      expect(result.result).toBe(6);
+    });
+
+    it('should calculate GCD of same numbers (Test 1.5)', () => {
+      const result = executeOperation('gcd', 5, 5);
+      expect(result.result).toBe(5);
+    });
+
+    it('should calculate GCD with zero (Test 1.6)', () => {
+      const result = executeOperation('gcd', 0, 12);
+      expect(result.result).toBe(12);
+    });
+
+    it('should throw error for GCD with both zeros (Test 1.7)', () => {
+      expect(() => executeOperation('gcd', 0, 0)).toThrow('GCD of (0, 0) is undefined');
+    });
+
+    it('should calculate GCD with negative numbers (Test 1.8)', () => {
+      const result = executeOperation('gcd', -48, 18);
+      expect(result.result).toBe(6);
+    });
+
+    it('should calculate GCD with large numbers (Test 1.9)', () => {
+      const result = executeOperation('gcd', 1071, 462);
+      expect(result.result).toBe(21);
+    });
+
+    it('should throw error for GCD with single number (Test 1.10)', () => {
+      expect(() => executeOperation('gcd', 5)).toThrow('At least 2 numbers are required');
+    });
+
+    it('should calculate GCD with decimal numbers (Test 1.11)', () => {
+      const result = executeOperation('gcd', 48.0, 18.0);
+      expect(result.result).toBe(6);
+    });
+  });
+
+  // Test Suite 2: LCM Operation
+  describe('lcm operation', () => {
+    it('should calculate basic LCM with two numbers (Test 2.1)', () => {
+      const result = executeOperation('lcm', 4, 6);
+      expect(result.result).toBe(12);
+      expect(result.operation).toBe('lcm');
+    });
+
+    it('should calculate LCM of coprime numbers (Test 2.2)', () => {
+      const result = executeOperation('lcm', 5, 7);
+      expect(result.result).toBe(35);
+    });
+
+    it('should calculate LCM with multiple numbers (Test 2.3)', () => {
+      const result = executeOperation('lcm', 12, 18, 24);
+      expect(result.result).toBe(72);
+    });
+
+    it('should calculate LCM when one number divides another (Test 2.4)', () => {
+      const result = executeOperation('lcm', 12, 6);
+      expect(result.result).toBe(12);
+    });
+
+    it('should calculate LCM of same numbers (Test 2.5)', () => {
+      const result = executeOperation('lcm', 5, 5);
+      expect(result.result).toBe(5);
+    });
+
+    it('should calculate LCM with zero (Test 2.6)', () => {
+      const result = executeOperation('lcm', 0, 12);
+      expect(result.result).toBe(0);
+    });
+
+    it('should calculate LCM with negative numbers (Test 2.7)', () => {
+      const result = executeOperation('lcm', -4, 6);
+      expect(result.result).toBe(12);
+    });
+
+    it('should calculate LCM with large numbers (Test 2.8)', () => {
+      const result = executeOperation('lcm', 100, 150);
+      expect(result.result).toBe(300);
+    });
+
+    it('should verify LCM relationship to GCD (Test 2.9)', () => {
+      const gcdResult = executeOperation('gcd', 48, 18);
+      const lcmResult = executeOperation('lcm', 48, 18);
+      expect(gcdResult.result).toBe(6);
+      expect(lcmResult.result).toBe(144);
+      // Verify: GCD(a,b) × LCM(a,b) = a × b
+      expect((gcdResult.result as number) * (lcmResult.result as number)).toBe(48 * 18);
+    });
+
+    it('should throw error for LCM with single number (Test 2.10)', () => {
+      expect(() => executeOperation('lcm', 5)).toThrow('At least 2 numbers are required');
+    });
+
+    it('should calculate LCM with decimal numbers (Test 2.11)', () => {
+      const result = executeOperation('lcm', 4.0, 6.0);
+      expect(result.result).toBe(12);
+    });
+  });
+
+  // Test Suite 3: Edge Cases and Error Handling
+  describe('gcd and lcm edge cases', () => {
+    it('should handle invalid number format (Test 3.1)', () => {
+      expect(() => parseNumbersArray(['48', 'abc'], 2)).toThrow();
+    });
+
+    it('should handle missing arguments (Test 3.2)', () => {
+      expect(() => executeOperation('gcd')).toThrow('At least 2 numbers are required');
+      expect(() => executeOperation('lcm')).toThrow('At least 2 numbers are required');
+    });
+
+    it('should calculate GCD with many numbers (Test 3.3)', () => {
+      const result = executeOperation('gcd', 12, 18, 24, 30, 36);
+      expect(result.result).toBe(6);
+    });
+
+    it('should calculate LCM with many numbers (Test 3.4)', () => {
+      const result = executeOperation('lcm', 2, 3, 4, 5, 6);
+      expect(result.result).toBe(60);
+    });
+
+    it('should calculate GCD with very large numbers (Test 3.5)', () => {
+      const result = executeOperation('gcd', 123456789, 987654321);
+      expect(result.result).toBe(9);
+    });
+
+    it('should calculate LCM with very large numbers (Test 3.6)', () => {
+      const result = executeOperation('lcm', 123456, 789012);
+      expect(result.result).toBe(8117355456);
+    });
+
+    it('should calculate GCD with one (Test 3.7)', () => {
+      const result = executeOperation('gcd', 1, 100);
+      expect(result.result).toBe(1);
+    });
+
+    it('should calculate LCM with one (Test 3.8)', () => {
+      const result = executeOperation('lcm', 1, 100);
+      expect(result.result).toBe(100);
+    });
+  });
 });
 
