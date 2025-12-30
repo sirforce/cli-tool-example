@@ -1168,5 +1168,179 @@ describe('operations', () => {
       expect(() => executeOperation('tobinary')).toThrow('Exactly 1 number is required');
     });
   });
+
+  // ============================================================================
+  // Spec 006: Factorial and Combinatorics Operations
+  // ============================================================================
+
+  // Test Suite 1: Factorial Operation
+  describe('factorial operation', () => {
+    it('should calculate factorial of zero (Test 1.1)', () => {
+      const result = executeOperation('factorial', 0);
+      expect(result.result).toBe(1);
+      expect(result.operation).toBe('factorial');
+    });
+
+    it('should calculate factorial of one (Test 1.2)', () => {
+      const result = executeOperation('factorial', 1);
+      expect(result.result).toBe(1);
+    });
+
+    it('should calculate factorial of small number (Test 1.3)', () => {
+      const result = executeOperation('factorial', 5);
+      expect(result.result).toBe(120);
+    });
+
+    it('should calculate factorial of medium number (Test 1.4)', () => {
+      const result = executeOperation('factorial', 10);
+      expect(result.result).toBe(3628800);
+    });
+
+    it('should throw error for negative number (Test 1.5)', () => {
+      expect(() => executeOperation('factorial', -5)).toThrow('Factorial is only defined for non-negative integers');
+    });
+
+    it('should throw error for decimal number (Test 1.6)', () => {
+      expect(() => executeOperation('factorial', 5.5)).toThrow();
+    });
+
+    it('should calculate factorial of large number (Test 1.7)', () => {
+      const result = executeOperation('factorial', 20);
+      expect(result.result).toBe(2432902008176640000);
+    });
+
+    it('should throw error for invalid input format (Test 1.8)', () => {
+      expect(() => parseNumbersArray(['abc'], 1)).toThrow();
+    });
+  });
+
+  // Test Suite 2: Combine Operation
+  describe('combine operation', () => {
+    it('should calculate basic combination (Test 2.1)', () => {
+      const result = executeOperation('combine', 5, 2);
+      expect(result.result).toBe(10);
+      expect(result.operation).toBe('combine');
+    });
+
+    it('should calculate combination with larger numbers (Test 2.2)', () => {
+      const result = executeOperation('combine', 10, 3);
+      expect(result.result).toBe(120);
+    });
+
+    it('should calculate combination when k equals n (Test 2.3)', () => {
+      const result = executeOperation('combine', 6, 6);
+      expect(result.result).toBe(1);
+    });
+
+    it('should calculate combination when k equals zero (Test 2.4)', () => {
+      const result = executeOperation('combine', 5, 0);
+      expect(result.result).toBe(1);
+    });
+
+    it('should calculate combination when k equals one (Test 2.5)', () => {
+      const result = executeOperation('combine', 5, 1);
+      expect(result.result).toBe(5);
+    });
+
+    it('should verify combination symmetry (Test 2.6)', () => {
+      const result1 = executeOperation('combine', 10, 3);
+      const result2 = executeOperation('combine', 10, 7);
+      expect(result1.result).toBe(120);
+      expect(result2.result).toBe(120);
+      expect(result1.result).toBe(result2.result);
+    });
+
+    it('should throw error when k greater than n (Test 2.7)', () => {
+      expect(() => executeOperation('combine', 5, 10)).toThrow('k cannot be greater than n in combinations');
+    });
+
+    it('should throw error for negative n (Test 2.8)', () => {
+      expect(() => executeOperation('combine', -5, 2)).toThrow();
+    });
+
+    it('should throw error for negative k (Test 2.9)', () => {
+      expect(() => executeOperation('combine', 5, -2)).toThrow();
+    });
+
+    it('should throw error for decimal inputs (Test 2.10)', () => {
+      expect(() => executeOperation('combine', 5.5, 2)).toThrow();
+    });
+  });
+
+  // Test Suite 3: Permute Operation
+  describe('permute operation', () => {
+    it('should calculate basic permutation (Test 3.1)', () => {
+      const result = executeOperation('permute', 5, 2);
+      expect(result.result).toBe(20);
+      expect(result.operation).toBe('permute');
+    });
+
+    it('should calculate permutation with larger numbers (Test 3.2)', () => {
+      const result = executeOperation('permute', 10, 3);
+      expect(result.result).toBe(720);
+    });
+
+    it('should calculate permutation when k equals n (Test 3.3)', () => {
+      const result = executeOperation('permute', 6, 6);
+      expect(result.result).toBe(720);
+    });
+
+    it('should calculate permutation when k equals zero (Test 3.4)', () => {
+      const result = executeOperation('permute', 5, 0);
+      expect(result.result).toBe(1);
+    });
+
+    it('should calculate permutation when k equals one (Test 3.5)', () => {
+      const result = executeOperation('permute', 5, 1);
+      expect(result.result).toBe(5);
+    });
+
+    it('should throw error when k greater than n (Test 3.6)', () => {
+      expect(() => executeOperation('permute', 5, 10)).toThrow('k cannot be greater than n in permutations');
+    });
+
+    it('should throw error for negative n (Test 3.7)', () => {
+      expect(() => executeOperation('permute', -5, 2)).toThrow();
+    });
+
+    it('should throw error for negative k (Test 3.8)', () => {
+      expect(() => executeOperation('permute', 5, -2)).toThrow();
+    });
+
+    it('should verify relationship between permute and combine (Test 3.9)', () => {
+      const permuteResult = executeOperation('permute', 5, 2);
+      const combineResult = executeOperation('combine', 5, 2);
+      const factorial2 = executeOperation('factorial', 2);
+      expect(permuteResult.result).toBe((combineResult.result as number) * (factorial2.result as number));
+    });
+  });
+
+  // Test Suite 4: Edge Cases and Error Handling
+  describe('factorial and combinatorics edge cases', () => {
+    it('should throw error for missing arguments (Test 4.1)', () => {
+      expect(() => executeOperation('factorial')).toThrow('Exactly 1 number is required');
+    });
+
+    it('should throw error for too many arguments on factorial (Test 4.2)', () => {
+      expect(() => executeOperation('factorial', 5, 3)).toThrow('Exactly 1 number is required');
+    });
+
+    it('should calculate very large factorial (Test 4.3)', () => {
+      const result = executeOperation('factorial', 25);
+      // 25! = 15511210043330985984000000
+      expect(result.result).toBe(15511210043330985984000000);
+    });
+
+    it('should calculate combination with large numbers (Test 4.4)', () => {
+      const result = executeOperation('combine', 20, 10);
+      expect(result.result).toBe(184756);
+    });
+
+    it('should calculate permutation with large numbers (Test 4.5)', () => {
+      const result = executeOperation('permute', 20, 10);
+      // P(20,10) = 20! / 10! = 670442572800
+      expect(result.result).toBe(670442572800);
+    });
+  });
 });
 

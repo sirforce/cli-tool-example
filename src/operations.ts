@@ -165,18 +165,68 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Convert an octal number to its decimal representation',
     example: 'calc fromoctal 12',
   },
+  factorial: {
+    description: 'Calculate the factorial of a non-negative integer (n!)',
+    example: 'calc factorial 5',
+  },
+  combine: {
+    description: 'Calculate the number of ways to choose k items from n items without regard to order (n choose k)',
+    example: 'calc combine 5 2',
+  },
+  permute: {
+    description: 'Calculate the number of ways to arrange k items from n items with regard to order (n permute k)',
+    example: 'calc permute 5 2',
+  },
 };
 
 /**
  * Set of unary operations (require exactly 1 argument)
  */
-const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'abs', 'ceil', 'floor', 'round', 'tobinary', 'tohex', 'tooctal', 'frombinary', 'fromhex', 'fromoctal']);
+const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'abs', 'ceil', 'floor', 'round', 'tobinary', 'tohex', 'tooctal', 'frombinary', 'fromhex', 'fromoctal', 'factorial']);
 
 /**
  * Set of n-ary operations (require 2+ arguments)
  * All operations now support multiple parameters
  */
-const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min', 'mean', 'median', 'mode', 'stddev', 'variance', 'range']);
+const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min', 'mean', 'median', 'mode', 'stddev', 'variance', 'range', 'combine', 'permute']);
+
+/**
+ * Validate that a number is a non-negative integer
+ */
+const validateNonNegativeInteger = (value: number, name: string): void => {
+  if (!Number.isInteger(value)) {
+    throw new Error(`${name} must be an integer`);
+  }
+  if (value < 0) {
+    throw new Error(`${name} must be non-negative`);
+  }
+};
+
+/**
+ * Calculate factorial using BigInt for large numbers
+ * Returns a number if within safe range, otherwise returns BigInt as number
+ */
+const factorialBigInt = (n: bigint): bigint => {
+  if (n === 0n || n === 1n) {
+    return 1n;
+  }
+  let result = 1n;
+  for (let i = 2n; i <= n; i++) {
+    result *= i;
+  }
+  return result;
+};
+
+/**
+ * Convert BigInt to number if within safe range, otherwise return as number (may lose precision)
+ */
+const bigIntToNumber = (value: bigint): number => {
+  if (value <= BigInt(Number.MAX_SAFE_INTEGER)) {
+    return Number(value);
+  }
+  // For very large numbers, convert to number (may lose precision but spec allows it)
+  return Number(value);
+};
 
 /**
  * Mathematical operations
@@ -445,6 +495,78 @@ export const operations: Record<string, ((...args: any[]) => number | string)> =
 
   fromoctal: (str: string): number => {
     return parseOctalNumber(str);
+  },
+
+  // Factorial and combinatorics operations
+  factorial: (n: number): number => {
+    if (!Number.isInteger(n)) {
+      throw new Error('Factorial is only defined for non-negative integers');
+    }
+    if (n < 0) {
+      throw new Error('Factorial is only defined for non-negative integers');
+    }
+    const result = factorialBigInt(BigInt(n));
+    return bigIntToNumber(result);
+  },
+
+  combine: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [n, k] = numbers;
+    validateNonNegativeInteger(n, 'n');
+    validateNonNegativeInteger(k, 'k');
+    
+    if (k > n) {
+      throw new Error('k cannot be greater than n in combinations');
+    }
+    
+    // Use symmetry property: C(n,k) = C(n,n-k) for efficiency
+    const effectiveK = k > n - k ? n - k : k;
+    
+    // Handle edge cases
+    if (effectiveK === 0) {
+      return 1;
+    }
+    
+    // Calculate C(n,k) = n! / (k! * (n-k)!) using iterative approach to avoid large factorials
+    // C(n,k) = (n * (n-1) * ... * (n-k+1)) / (k * (k-1) * ... * 1)
+    let numerator = 1n;
+    let denominator = 1n;
+    
+    for (let i = 0; i < effectiveK; i++) {
+      numerator *= BigInt(n - i);
+      denominator *= BigInt(effectiveK - i);
+    }
+    
+    const result = numerator / denominator;
+    return bigIntToNumber(result);
+  },
+
+  permute: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [n, k] = numbers;
+    validateNonNegativeInteger(n, 'n');
+    validateNonNegativeInteger(k, 'k');
+    
+    if (k > n) {
+      throw new Error('k cannot be greater than n in permutations');
+    }
+    
+    // Handle edge cases
+    if (k === 0) {
+      return 1;
+    }
+    
+    // Calculate P(n,k) = n! / (n-k)! = n * (n-1) * ... * (n-k+1)
+    let result = 1n;
+    for (let i = 0; i < k; i++) {
+      result *= BigInt(n - i);
+    }
+    
+    return bigIntToNumber(result);
   },
 };
 
