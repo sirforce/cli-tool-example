@@ -1507,5 +1507,292 @@ describe('operations', () => {
       expect(result.result).toBe(100);
     });
   });
+
+  // ============================================================================
+  // Spec 005: Percentage Calculations
+  // ============================================================================
+
+  // Test Suite 1: Percent Operation
+  describe('percent operation', () => {
+    it('should calculate basic percentage (Test 1.1)', () => {
+      const result = executeOperation('percent', 25, 100);
+      expect(result.result).toBe(25);
+      expect(result.operation).toBe('percent');
+    });
+
+    it('should calculate percentage with different totals (Test 1.2)', () => {
+      const result = executeOperation('percent', 50, 200);
+      expect(result.result).toBe(25);
+    });
+
+    it('should calculate percentage with decimal result (Test 1.3)', () => {
+      const result = executeOperation('percent', 1, 3);
+      expect(result.result).toBeCloseTo(33.333333333333336, 10);
+    });
+
+    it('should calculate percentage greater than 100 (Test 1.4)', () => {
+      const result = executeOperation('percent', 150, 100);
+      expect(result.result).toBe(150);
+    });
+
+    it('should calculate percentage with zero part (Test 1.5)', () => {
+      const result = executeOperation('percent', 0, 100);
+      expect(result.result).toBe(0);
+    });
+
+    it('should throw error for zero total (Test 1.6)', () => {
+      expect(() => executeOperation('percent', 25, 0)).toThrow('Cannot calculate percentage: total cannot be zero');
+    });
+
+    it('should calculate percentage with decimal numbers (Test 1.7)', () => {
+      const result = executeOperation('percent', 12.5, 50);
+      expect(result.result).toBe(25);
+    });
+
+    it('should calculate percentage with negative numbers (Test 1.8)', () => {
+      const result = executeOperation('percent', -25, 100);
+      expect(result.result).toBe(-25);
+    });
+  });
+
+  // Test Suite 2: Percentof Operation
+  describe('percentof operation', () => {
+    it('should calculate basic percentage of (Test 2.1)', () => {
+      const result = executeOperation('percentof', 25, 100);
+      expect(result.result).toBe(25);
+      expect(result.operation).toBe('percentof');
+    });
+
+    it('should calculate percentage of with different values (Test 2.2)', () => {
+      const result = executeOperation('percentof', 50, 200);
+      expect(result.result).toBe(100);
+    });
+
+    it('should calculate percentage of with decimal percentage (Test 2.3)', () => {
+      const result = executeOperation('percentof', 12.5, 100);
+      expect(result.result).toBe(12.5);
+    });
+
+    it('should calculate percentage of with decimal number (Test 2.4)', () => {
+      const result = executeOperation('percentof', 10, 50.5);
+      expect(result.result).toBeCloseTo(5.05, 10);
+    });
+
+    it('should calculate percentage of zero (Test 2.5)', () => {
+      const result = executeOperation('percentof', 25, 0);
+      expect(result.result).toBe(0);
+    });
+
+    it('should calculate percentage of 100% (Test 2.6)', () => {
+      const result = executeOperation('percentof', 100, 50);
+      expect(result.result).toBe(50);
+    });
+
+    it('should calculate percentage of greater than 100% (Test 2.7)', () => {
+      const result = executeOperation('percentof', 150, 100);
+      expect(result.result).toBe(150);
+    });
+
+    it('should calculate percentage of with negative number (Test 2.8)', () => {
+      const result = executeOperation('percentof', 10, -50);
+      expect(result.result).toBe(-5);
+    });
+  });
+
+  // Test Suite 3: Percentchange Operation
+  describe('percentchange operation', () => {
+    it('should calculate percentage increase (Test 3.1)', () => {
+      const result = executeOperation('percentchange', 100, 120);
+      expect(result.result).toBe(20);
+      expect(result.operation).toBe('percentchange');
+    });
+
+    it('should calculate percentage decrease (Test 3.2)', () => {
+      const result = executeOperation('percentchange', 100, 80);
+      expect(result.result).toBe(-20);
+    });
+
+    it('should calculate no change (Test 3.3)', () => {
+      const result = executeOperation('percentchange', 50, 50);
+      expect(result.result).toBe(0);
+    });
+
+    it('should calculate percentage change with decimal result (Test 3.4)', () => {
+      const result = executeOperation('percentchange', 100, 115);
+      expect(result.result).toBe(15);
+    });
+
+    it('should throw error for zero old value (Test 3.5)', () => {
+      expect(() => executeOperation('percentchange', 0, 100)).toThrow('Cannot calculate percentage change: old value cannot be zero');
+    });
+
+    it('should calculate percentage change to zero (Test 3.6)', () => {
+      const result = executeOperation('percentchange', 100, 0);
+      expect(result.result).toBe(-100);
+    });
+
+    it('should calculate large percentage increase (Test 3.7)', () => {
+      const result = executeOperation('percentchange', 10, 30);
+      expect(result.result).toBe(200);
+    });
+
+    it('should calculate percentage change with negative values (Test 3.8)', () => {
+      const result = executeOperation('percentchange', -100, -80);
+      // Mathematically: ((-80 - (-100)) / (-100)) * 100 = (20 / -100) * 100 = -20
+      // Spec says "or error, depending on implementation" - we allow negatives and return -20
+      expect(result.result).toBe(-20);
+    });
+  });
+
+  // Test Suite 4: Addpercent Operation
+  describe('addpercent operation', () => {
+    it('should add percentage to number (Test 4.1)', () => {
+      const result = executeOperation('addpercent', 100, 10);
+      expect(result.result).toBe(110);
+      expect(result.operation).toBe('addpercent');
+    });
+
+    it('should add percentage with different values (Test 4.2)', () => {
+      const result = executeOperation('addpercent', 50, 20);
+      expect(result.result).toBe(60);
+    });
+
+    it('should add percentage with decimal (Test 4.3)', () => {
+      const result = executeOperation('addpercent', 100, 12.5);
+      expect(result.result).toBe(112.5);
+    });
+
+    it('should add zero percentage (Test 4.4)', () => {
+      const result = executeOperation('addpercent', 100, 0);
+      expect(result.result).toBe(100);
+    });
+
+    it('should add large percentage (Test 4.5)', () => {
+      const result = executeOperation('addpercent', 100, 200);
+      expect(result.result).toBe(300);
+    });
+
+    it('should add percentage to zero (Test 4.6)', () => {
+      const result = executeOperation('addpercent', 0, 10);
+      expect(result.result).toBe(0);
+    });
+
+    it('should add percentage to negative number (Test 4.7)', () => {
+      const result = executeOperation('addpercent', -100, 10);
+      expect(result.result).toBe(-110);
+    });
+  });
+
+  // Test Suite 5: Subtractpercent Operation
+  describe('subtractpercent operation', () => {
+    it('should subtract percentage from number (Test 5.1)', () => {
+      const result = executeOperation('subtractpercent', 100, 10);
+      expect(result.result).toBe(90);
+      expect(result.operation).toBe('subtractpercent');
+    });
+
+    it('should subtract percentage with different values (Test 5.2)', () => {
+      const result = executeOperation('subtractpercent', 50, 20);
+      expect(result.result).toBe(40);
+    });
+
+    it('should subtract percentage with decimal (Test 5.3)', () => {
+      const result = executeOperation('subtractpercent', 100, 12.5);
+      expect(result.result).toBe(87.5);
+    });
+
+    it('should subtract zero percentage (Test 5.4)', () => {
+      const result = executeOperation('subtractpercent', 100, 0);
+      expect(result.result).toBe(100);
+    });
+
+    it('should subtract large percentage (Test 5.5)', () => {
+      const result = executeOperation('subtractpercent', 100, 50);
+      expect(result.result).toBe(50);
+    });
+
+    it('should subtract percentage from zero (Test 5.6)', () => {
+      const result = executeOperation('subtractpercent', 0, 10);
+      expect(result.result).toBe(0);
+    });
+
+    it('should subtract more than 100% (Test 5.7)', () => {
+      const result = executeOperation('subtractpercent', 100, 150);
+      expect(result.result).toBe(-50);
+    });
+  });
+
+  // Test Suite 6: Percentincrease Operation
+  describe('percentincrease operation', () => {
+    it('should calculate basic percentage increase (Test 6.1)', () => {
+      const result = executeOperation('percentincrease', 100, 120);
+      expect(result.result).toBe(20);
+      expect(result.operation).toBe('percentincrease');
+    });
+
+    it('should calculate percentage increase with different values (Test 6.2)', () => {
+      const result = executeOperation('percentincrease', 50, 75);
+      expect(result.result).toBe(50);
+    });
+
+    it('should calculate no increase (Test 6.3)', () => {
+      const result = executeOperation('percentincrease', 100, 100);
+      expect(result.result).toBe(0);
+    });
+
+    it('should calculate large percentage increase (Test 6.4)', () => {
+      const result = executeOperation('percentincrease', 10, 30);
+      expect(result.result).toBe(200);
+    });
+
+    it('should throw error for zero old value (Test 6.5)', () => {
+      expect(() => executeOperation('percentincrease', 0, 100)).toThrow('Cannot calculate percentage increase: old value cannot be zero');
+    });
+
+    it('should calculate decrease as negative (Test 6.6)', () => {
+      const result = executeOperation('percentincrease', 100, 80);
+      expect(result.result).toBe(-20);
+    });
+
+    it('should calculate percentage increase with decimal result (Test 6.7)', () => {
+      const result = executeOperation('percentincrease', 100, 115);
+      expect(result.result).toBe(15);
+    });
+  });
+
+  // Test Suite 7: Edge Cases and Error Handling
+  describe('percentage operations edge cases', () => {
+    it('should handle invalid number format (Test 7.1)', () => {
+      expect(() => parseNumbersArray(['25', 'abc'], 2)).toThrow();
+    });
+
+    it('should handle missing arguments (Test 7.2)', () => {
+      expect(() => executeOperation('percent', 25)).toThrow('At least 2 numbers are required');
+    });
+
+    it('should handle very small percentages (Test 7.3)', () => {
+      const result = executeOperation('percentof', 0.1, 1000);
+      expect(result.result).toBe(1);
+    });
+
+    it('should handle very large percentages (Test 7.4)', () => {
+      const result = executeOperation('percentof', 1000, 100);
+      expect(result.result).toBe(1000);
+    });
+
+    it('should handle precision with repeating decimals (Test 7.5)', () => {
+      const result = executeOperation('percent', 1, 3);
+      expect(result.result).toBeCloseTo(33.333333333333336, 10);
+    });
+
+    it('should handle round-trip calculation (Test 7.6)', () => {
+      const addResult = executeOperation('addpercent', 100, 10);
+      expect(addResult.result).toBe(110);
+      const subtractResult = executeOperation('subtractpercent', addResult.result as number, 10);
+      // Note: Subtracting 10% from 110 gives 99, not 100, because 10% of 110 is 11, not 10
+      // This is mathematically correct behavior, not a precision issue
+      expect(subtractResult.result).toBe(99);
+    });
+  });
 });
 

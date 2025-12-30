@@ -185,6 +185,30 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Calculate the least common multiple of multiple numbers',
     example: 'calc lcm 4 6',
   },
+  percent: {
+    description: 'Calculate what percentage the first number is of the second number',
+    example: 'calc percent 25 100',
+  },
+  percentof: {
+    description: 'Calculate a given percentage of a number',
+    example: 'calc percentof 25 100',
+  },
+  percentchange: {
+    description: 'Calculate the percentage change from the first number to the second number',
+    example: 'calc percentchange 100 120',
+  },
+  addpercent: {
+    description: 'Add a percentage to a number',
+    example: 'calc addpercent 100 10',
+  },
+  subtractpercent: {
+    description: 'Subtract a percentage from a number',
+    example: 'calc subtractpercent 100 10',
+  },
+  percentincrease: {
+    description: 'Calculate what percentage increase is needed to go from the first number to the second number',
+    example: 'calc percentincrease 100 120',
+  },
 };
 
 /**
@@ -196,7 +220,7 @@ const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'a
  * Set of n-ary operations (require 2+ arguments)
  * All operations now support multiple parameters
  */
-const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min', 'mean', 'median', 'mode', 'stddev', 'variance', 'range', 'combine', 'permute', 'gcd', 'lcm']);
+const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 'sum', 'product', 'max', 'min', 'mean', 'median', 'mode', 'stddev', 'variance', 'range', 'combine', 'permute', 'gcd', 'lcm', 'percent', 'percentof', 'percentchange', 'addpercent', 'subtractpercent', 'percentincrease']);
 
 /**
  * Validate that a number is a non-negative integer
@@ -441,6 +465,64 @@ export const operations: Record<string, ((...args: any[]) => number | string)> =
     const max = Math.max(...numbers);
     const min = Math.min(...numbers);
     return max - min;
+  },
+
+  // Percentage operations (require exactly 2 arguments)
+  percent: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [part, total] = numbers;
+    if (total === 0) {
+      throw new Error('Cannot calculate percentage: total cannot be zero');
+    }
+    return (part / total) * 100;
+  },
+
+  percentof: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [percentage, number] = numbers;
+    return (percentage / 100) * number;
+  },
+
+  percentchange: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [oldValue, newValue] = numbers;
+    if (oldValue === 0) {
+      throw new Error('Cannot calculate percentage change: old value cannot be zero');
+    }
+    return ((newValue - oldValue) / oldValue) * 100;
+  },
+
+  addpercent: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [number, percentage] = numbers;
+    return number + (percentage / 100) * number;
+  },
+
+  subtractpercent: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [number, percentage] = numbers;
+    return number - (percentage / 100) * number;
+  },
+
+  percentincrease: (...numbers: number[]): number => {
+    if (numbers.length !== 2) {
+      throw new Error('Exactly 2 numbers are required');
+    }
+    const [oldValue, newValue] = numbers;
+    if (oldValue === 0) {
+      throw new Error('Cannot calculate percentage increase: old value cannot be zero');
+    }
+    return ((newValue - oldValue) / oldValue) * 100;
   },
 
   // Number system conversion operations (unary, return strings for "to" operations)
