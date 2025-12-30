@@ -1170,6 +1170,63 @@ describe('operations', () => {
   });
 
   // ============================================================================
+  // Spec 008: Expression Evaluation
+  // ============================================================================
+
+  describe('eval operation', () => {
+    it('should evaluate simple addition expression', () => {
+      const result = executeOperation('eval', '2 + 3' as any);
+      expect(result.result).toBe(5);
+      expect(result.operation).toBe('eval');
+    });
+
+    it('should evaluate expression with operator precedence', () => {
+      const result = executeOperation('eval', '2 + 3 * 4' as any);
+      expect(result.result).toBe(14);
+    });
+
+    it('should evaluate expression with parentheses', () => {
+      const result = executeOperation('eval', '(2 + 3) * 4' as any);
+      expect(result.result).toBe(20);
+    });
+
+    it('should evaluate expression with functions', () => {
+      const result = executeOperation('eval', 'sqrt(16) + 5' as any);
+      expect(result.result).toBe(9);
+    });
+
+    it('should evaluate expression with constants', () => {
+      const result = executeOperation('eval', '2 * pi' as any);
+      expect(result.result).toBeCloseTo(6.283185307179586, 10);
+    });
+
+    it('should evaluate complex expression', () => {
+      const result = executeOperation('eval', '(sqrt(16) + abs(-5)) * (log10(100) + 1)' as any);
+      expect(result.result).toBe(27);
+    });
+
+    it('should throw error for division by zero', () => {
+      expect(() => executeOperation('eval', '10 / 0' as any)).toThrow('Division by zero is not allowed');
+    });
+
+    it('should throw error for invalid expression', () => {
+      expect(() => executeOperation('eval', '2 + + 3' as any)).toThrow();
+    });
+
+    it('should throw error for empty expression', () => {
+      expect(() => executeOperation('eval', '' as any)).toThrow('Empty expression');
+    });
+
+    it('should throw error for unmatched parentheses', () => {
+      expect(() => executeOperation('eval', '(2 + 3' as any)).toThrow(/unmatched parentheses/i);
+    });
+
+    it('should throw error for unknown function', () => {
+      expect(() => executeOperation('eval', 'invalid(5)' as any)).toThrow(/unknown function/i);
+    });
+  });
+
+  // ============================================================================
   // Spec 006: Factorial and Combinatorics Operations
   // ============================================================================
 

@@ -1,4 +1,5 @@
 import { parseIntegerNumber, parseBinaryNumber, parseHexNumber, parseOctalNumber } from './utils';
+import { evaluateExpression } from './expression-evaluator';
 
 /**
  * Type definition for binary mathematical operations
@@ -165,6 +166,10 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Convert an octal number to its decimal representation',
     example: 'calc fromoctal 12',
   },
+  eval: {
+    description: 'Evaluate a mathematical expression string',
+    example: 'calc eval "2 + 3 * 4"',
+  },
   factorial: {
     description: 'Calculate the factorial of a non-negative integer (n!)',
     example: 'calc factorial 5',
@@ -214,7 +219,7 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
 /**
  * Set of unary operations (require exactly 1 argument)
  */
-const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'abs', 'ceil', 'floor', 'round', 'tobinary', 'tohex', 'tooctal', 'frombinary', 'fromhex', 'fromoctal', 'factorial']);
+const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'abs', 'ceil', 'floor', 'round', 'tobinary', 'tohex', 'tooctal', 'frombinary', 'fromhex', 'fromoctal', 'factorial', 'eval']);
 
 /**
  * Set of n-ary operations (require 2+ arguments)
@@ -585,6 +590,10 @@ export const operations: Record<string, ((...args: any[]) => number | string)> =
 
   fromoctal: (str: string): number => {
     return parseOctalNumber(str);
+  },
+
+  eval: (expression: string): number => {
+    return evaluateExpression(expression);
   },
 
   // Factorial and combinatorics operations

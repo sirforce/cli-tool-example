@@ -35,8 +35,9 @@ program
       // Determine minimum number of arguments required based on operation type
       const minCount = isUnaryOperation(operation) ? 1 : 2;
 
-      // Check if this is a "from" operation (needs string input)
+      // Check if this is a "from" operation or "eval" operation (needs string input)
       const isFromOperation = operation === 'frombinary' || operation === 'fromhex' || operation === 'fromoctal';
+      const isEvalOperation = operation === 'eval';
       
       let result: { result: number | string; operation: string; modes?: number[] };
       
@@ -46,6 +47,13 @@ program
           throw new Error(`At least ${minCount} argument${minCount > 1 ? 's' : ''} ${minCount > 1 ? 'are' : 'is'} required`);
         }
         result = executeOperation(operation, numbers[0] as any);
+      } else if (isEvalOperation) {
+        // For "eval" operation, join all arguments as the expression string
+        if (numbers.length < 1) {
+          throw new Error('At least 1 argument is required');
+        }
+        const expression = numbers.join(' ');
+        result = executeOperation(operation, expression as any);
       } else {
         // For other operations, parse numbers normally
         const validatedNumbers = parseNumbersArray(numbers, minCount);
