@@ -9,6 +9,7 @@ import {
   isUnaryOperation
 } from './operations';
 import { parseNumbers, formatResult, parseNumbersArray } from './utils';
+import { executeBatchOperation } from './batch';
 
 const program = new Command();
 
@@ -60,6 +61,51 @@ program
     }
   });
 
+// Add batch command
+program
+  .command('batch')
+  .description('Perform operations on numbers from a file')
+  .argument('<operation>', 'Operation to perform')
+  .argument('<file_path>', 'Path to file containing numbers')
+  .option('--format <format>', 'File format: text, csv, or json', 'text')
+  .option('--column <column>', 'CSV column index (0-based) or column name')
+  .option('--field <field>', 'JSON field name for object arrays')
+  .option('--delimiter <delimiter>', 'Text file delimiter character', ' ')
+  .action((operation: string, filePath: string, options: any) => {
+    try {
+      // Validate operation
+      if (!isValidOperation(operation)) {
+        console.error(`Error: Unknown operation "${operation}"`);
+        console.error(`Available operations: ${getAvailableOperations().join(', ')}`);
+        process.exit(1);
+      }
+
+      // Parse column option - can be number or string
+      let column: string | number | undefined = options.column;
+      if (column !== undefined && typeof column === 'string') {
+        const columnNum = parseInt(column, 10);
+        if (!isNaN(columnNum) && columnNum.toString() === column) {
+          column = columnNum;
+        }
+      }
+
+      // Execute batch operation
+      const result = executeBatchOperation(operation, filePath, {
+        format: options.format,
+        column: column,
+        field: options.field,
+        delimiter: options.delimiter,
+      });
+
+      // Display result
+      console.log(formatResult(result.operation, result.result, result.modes));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      console.error(`Error: ${errorMessage}`);
+      process.exit(1);
+    }
+  });
+
 // Add custom help text showing all available operations
 program.addHelpText('after', () => {
   const operations = getAllOperationsWithDescriptions();
@@ -69,6 +115,12 @@ program.addHelpText('after', () => {
     helpText += `\n  ${op.name.padEnd(12)} ${op.description}\n`;
     helpText += `  ${' '.repeat(12)} Example: ${op.example}\n`;
   });
+  
+  helpText += '\nBatch Operations:\n';
+  helpText += '\n  batch         Perform operations on numbers from a file\n';
+  helpText += '                 Example: calc batch sum numbers.txt\n';
+  helpText += '                 Example: calc batch mean data.csv --format csv --column value\n';
+  helpText += '                 Example: calc batch max values.json --format json --field value\n';
   
   return helpText;
 });
