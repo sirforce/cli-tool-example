@@ -35,9 +35,10 @@ program
       // Determine minimum number of arguments required based on operation type
       const minCount = isUnaryOperation(operation) ? 1 : 2;
 
-      // Check if this is a "from" operation or "eval" operation (needs string input)
+      // Check if this is a "from" operation, "eval" operation, or "convert" operation (needs special handling)
       const isFromOperation = operation === 'frombinary' || operation === 'fromhex' || operation === 'fromoctal';
       const isEvalOperation = operation === 'eval';
+      const isConvertOperation = operation === 'convert';
       
       let result: { result: number | string; operation: string; modes?: number[] };
       
@@ -54,6 +55,16 @@ program
         }
         const expression = numbers.join(' ');
         result = executeOperation(operation, expression as any);
+      } else if (isConvertOperation) {
+        // For "convert" operation, first arg is number, next two are strings
+        if (numbers.length !== 3) {
+          throw new Error('Exactly 3 arguments are required');
+        }
+        const value = parseFloat(numbers[0]);
+        if (isNaN(value)) {
+          throw new Error(`Invalid number format: ${numbers[0]}`);
+        }
+        result = executeOperation(operation, value, numbers[1], numbers[2]);
       } else {
         // For other operations, parse numbers normally
         const validatedNumbers = parseNumbersArray(numbers, minCount);

@@ -1851,5 +1851,210 @@ describe('operations', () => {
       expect(subtractResult.result).toBe(99);
     });
   });
+
+  // ============================================================================
+  // Spec 009: Unit Conversions
+  // ============================================================================
+
+  // Test Suite 1: Length Conversions
+  describe('convert operation - Length Conversions', () => {
+    it('should convert meter to foot (Test 1.1)', () => {
+      const result = executeOperation('convert', 1, 'meter', 'foot');
+      expect(result.result).toBeCloseTo(3.28084, 5);
+      expect(result.operation).toBe('convert');
+    });
+
+    it('should convert foot to meter (Test 1.2)', () => {
+      const result = executeOperation('convert', 3.28084, 'foot', 'meter');
+      expect(result.result).toBeCloseTo(1, 5);
+    });
+
+    it('should convert kilometer to mile (Test 1.3)', () => {
+      const result = executeOperation('convert', 1, 'kilometer', 'mile');
+      expect(result.result).toBeCloseTo(0.621371, 6);
+    });
+
+    it('should convert centimeter to inch (Test 1.4)', () => {
+      const result = executeOperation('convert', 2.54, 'centimeter', 'inch');
+      expect(result.result).toBeCloseTo(1, 5);
+    });
+
+    it('should convert yard to meter (Test 1.5)', () => {
+      const result = executeOperation('convert', 1, 'yard', 'meter');
+      expect(result.result).toBeCloseTo(0.9144, 5);
+    });
+
+    it('should handle unit aliases (Test 1.6)', () => {
+      const result = executeOperation('convert', 1, 'm', 'ft');
+      expect(result.result).toBeCloseTo(3.28084, 5);
+    });
+
+    it('should throw error for incompatible units (Test 1.7)', () => {
+      expect(() => executeOperation('convert', 1, 'meter', 'kilogram')).toThrow('Cannot convert between meter and kilogram (different unit categories)');
+    });
+  });
+
+  // Test Suite 2: Weight/Mass Conversions
+  describe('convert operation - Weight/Mass Conversions', () => {
+    it('should convert kilogram to pound (Test 2.1)', () => {
+      const result = executeOperation('convert', 1, 'kilogram', 'pound');
+      expect(result.result).toBeCloseTo(2.20462, 5);
+      expect(result.operation).toBe('convert');
+    });
+
+    it('should convert pound to kilogram (Test 2.2)', () => {
+      const result = executeOperation('convert', 2.20462, 'pound', 'kilogram');
+      expect(result.result).toBeCloseTo(1, 5);
+    });
+
+    it('should convert gram to ounce (Test 2.3)', () => {
+      const result = executeOperation('convert', 28.3495, 'gram', 'ounce');
+      expect(result.result).toBeCloseTo(1, 5);
+    });
+
+    it('should convert ton to kilogram (Test 2.4)', () => {
+      const result = executeOperation('convert', 1, 'ton', 'kilogram');
+      expect(result.result).toBeCloseTo(907.185, 3);
+    });
+
+    it('should convert milligram to gram (Test 2.5)', () => {
+      const result = executeOperation('convert', 1000, 'milligram', 'gram');
+      expect(result.result).toBe(1);
+    });
+  });
+
+  // Test Suite 3: Temperature Conversions
+  describe('convert operation - Temperature Conversions', () => {
+    it('should convert celsius to fahrenheit (Test 3.1)', () => {
+      const result = executeOperation('convert', 0, 'celsius', 'fahrenheit');
+      expect(result.result).toBe(32);
+      expect(result.operation).toBe('convert');
+    });
+
+    it('should convert fahrenheit to celsius (Test 3.2)', () => {
+      const result = executeOperation('convert', 32, 'fahrenheit', 'celsius');
+      expect(result.result).toBe(0);
+    });
+
+    it('should convert celsius to kelvin (Test 3.3)', () => {
+      const result = executeOperation('convert', 0, 'celsius', 'kelvin');
+      expect(result.result).toBe(273.15);
+    });
+
+    it('should convert fahrenheit to kelvin (Test 3.4)', () => {
+      const result = executeOperation('convert', 32, 'fahrenheit', 'kelvin');
+      expect(result.result).toBeCloseTo(273.15, 2);
+    });
+
+    it('should convert kelvin to celsius (Test 3.5)', () => {
+      const result = executeOperation('convert', 273.15, 'kelvin', 'celsius');
+      expect(result.result).toBe(0);
+    });
+
+    it('should convert boiling point celsius to fahrenheit (Test 3.6)', () => {
+      const result = executeOperation('convert', 100, 'celsius', 'fahrenheit');
+      expect(result.result).toBe(212);
+    });
+
+    it('should convert -40 celsius to fahrenheit (Test 3.7)', () => {
+      const result = executeOperation('convert', -40, 'celsius', 'fahrenheit');
+      expect(result.result).toBe(-40);
+    });
+  });
+
+  // Test Suite 4: Volume Conversions
+  describe('convert operation - Volume Conversions', () => {
+    it('should convert liter to gallon (Test 4.1)', () => {
+      const result = executeOperation('convert', 3.78541, 'liter', 'gallon');
+      expect(result.result).toBeCloseTo(1, 5);
+      expect(result.operation).toBe('convert');
+    });
+
+    it('should convert milliliter to liter (Test 4.2)', () => {
+      const result = executeOperation('convert', 1000, 'milliliter', 'liter');
+      expect(result.result).toBe(1);
+    });
+
+    it('should convert gallon to quart (Test 4.3)', () => {
+      const result = executeOperation('convert', 1, 'gallon', 'quart');
+      expect(result.result).toBe(4);
+    });
+
+    it('should convert cup to fluid_ounce (Test 4.4)', () => {
+      const result = executeOperation('convert', 1, 'cup', 'fluid_ounce');
+      expect(result.result).toBe(8);
+    });
+  });
+
+  // Test Suite 5: Time Conversions
+  describe('convert operation - Time Conversions', () => {
+    it('should convert second to minute (Test 5.1)', () => {
+      const result = executeOperation('convert', 60, 'second', 'minute');
+      expect(result.result).toBe(1);
+      expect(result.operation).toBe('convert');
+    });
+
+    it('should convert hour to minute (Test 5.2)', () => {
+      const result = executeOperation('convert', 1, 'hour', 'minute');
+      expect(result.result).toBe(60);
+    });
+
+    it('should convert day to hour (Test 5.3)', () => {
+      const result = executeOperation('convert', 1, 'day', 'hour');
+      expect(result.result).toBe(24);
+    });
+
+    it('should convert week to day (Test 5.4)', () => {
+      const result = executeOperation('convert', 1, 'week', 'day');
+      expect(result.result).toBe(7);
+    });
+
+    it('should convert year to day (Test 5.5)', () => {
+      const result = executeOperation('convert', 1, 'year', 'day');
+      expect(result.result).toBe(365);
+    });
+  });
+
+  // Test Suite 6: Edge Cases and Error Handling
+  describe('convert operation - Edge Cases and Error Handling', () => {
+    it('should throw error for invalid unit name (Test 6.1)', () => {
+      expect(() => executeOperation('convert', 1, 'invalid_unit', 'meter')).toThrow('Unknown unit: invalid_unit');
+    });
+
+    it('should throw error for missing arguments (Test 6.2)', () => {
+      expect(() => executeOperation('convert', 1, 'meter')).toThrow('Exactly 3 arguments are required');
+    });
+
+    it('should throw error for invalid number format (Test 6.3)', () => {
+      // This will be caught at parseNumbersArray level in index.ts
+      // But we can test the operation itself with invalid string
+      expect(() => executeOperation('convert', NaN, 'meter', 'foot')).toThrow();
+    });
+
+    it('should handle same unit conversion (Test 6.4)', () => {
+      const result = executeOperation('convert', 5, 'meter', 'meter');
+      expect(result.result).toBe(5);
+    });
+
+    it('should handle zero value (Test 6.5)', () => {
+      const result = executeOperation('convert', 0, 'meter', 'foot');
+      expect(result.result).toBe(0);
+    });
+
+    it('should handle very large value (Test 6.6)', () => {
+      const result = executeOperation('convert', 1000000, 'meter', 'kilometer');
+      expect(result.result).toBe(1000);
+    });
+
+    it('should handle very small value (Test 6.7)', () => {
+      const result = executeOperation('convert', 0.001, 'meter', 'millimeter');
+      expect(result.result).toBe(1);
+    });
+
+    it('should handle negative value for non-temperature (Test 6.8)', () => {
+      const result = executeOperation('convert', -5, 'meter', 'foot');
+      expect(result.result).toBeCloseTo(-16.4042, 4);
+    });
+  });
 });
 

@@ -214,6 +214,10 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Calculate what percentage increase is needed to go from the first number to the second number',
     example: 'calc percentincrease 100 120',
   },
+  convert: {
+    description: 'Convert a value from one unit to another (length, weight, temperature, volume, time)',
+    example: 'calc convert 100 meter foot',
+  },
 };
 
 /**
@@ -264,6 +268,155 @@ const bigIntToNumber = (value: bigint): number => {
   // For very large numbers, convert to number (may lose precision but spec allows it)
   return Number(value);
 };
+
+/**
+ * Unit conversion system
+ */
+
+// Unit categories
+type UnitCategory = 'length' | 'weight' | 'temperature' | 'volume' | 'time';
+
+// Unit definition interface
+interface UnitDefinition {
+  name: string;
+  category: UnitCategory;
+  toBase: number; // Conversion factor to base unit (not used for temperature)
+  aliases: string[];
+}
+
+// Unit registry
+const unitRegistry: Map<string, UnitDefinition> = new Map();
+
+// Length units (base: meter)
+const lengthUnits: UnitDefinition[] = [
+  { name: 'meter', category: 'length', toBase: 1, aliases: ['m', 'meters'] },
+  { name: 'kilometer', category: 'length', toBase: 1000, aliases: ['km', 'kilometers'] },
+  { name: 'centimeter', category: 'length', toBase: 0.01, aliases: ['cm', 'centimeters'] },
+  { name: 'millimeter', category: 'length', toBase: 0.001, aliases: ['mm', 'millimeters'] },
+  { name: 'foot', category: 'length', toBase: 0.3048, aliases: ['ft', 'feet'] },
+  { name: 'inch', category: 'length', toBase: 0.0254, aliases: ['in', 'inches'] },
+  { name: 'yard', category: 'length', toBase: 0.9144, aliases: ['yd', 'yards'] },
+  { name: 'mile', category: 'length', toBase: 1609.344, aliases: ['mi', 'miles'] },
+];
+
+// Weight units (base: kilogram)
+const weightUnits: UnitDefinition[] = [
+  { name: 'kilogram', category: 'weight', toBase: 1, aliases: ['kg', 'kilograms'] },
+  { name: 'gram', category: 'weight', toBase: 0.001, aliases: ['g', 'grams'] },
+  { name: 'milligram', category: 'weight', toBase: 0.000001, aliases: ['mg', 'milligrams'] },
+  { name: 'pound', category: 'weight', toBase: 0.453592, aliases: ['lb', 'pounds'] },
+  { name: 'ounce', category: 'weight', toBase: 0.0283495, aliases: ['oz', 'ounces'] },
+  { name: 'ton', category: 'weight', toBase: 907.185, aliases: ['tons'] }, // US ton
+];
+
+// Temperature units (special handling - no base unit conversion)
+const temperatureUnits: UnitDefinition[] = [
+  { name: 'celsius', category: 'temperature', toBase: 1, aliases: ['C', 'c'] },
+  { name: 'fahrenheit', category: 'temperature', toBase: 1, aliases: ['F', 'f'] },
+  { name: 'kelvin', category: 'temperature', toBase: 1, aliases: ['K', 'k'] },
+];
+
+// Volume units (base: liter)
+// Using exact relationships: 1 gallon = 4 quarts = 8 pints = 16 cups = 128 fl_oz
+const volumeUnits: UnitDefinition[] = [
+  { name: 'liter', category: 'volume', toBase: 1, aliases: ['L', 'l', 'liters'] },
+  { name: 'milliliter', category: 'volume', toBase: 0.001, aliases: ['mL', 'ml', 'milliliters'] },
+  { name: 'gallon', category: 'volume', toBase: 3.785411784, aliases: ['gal', 'gallons'] }, // More precise value
+  { name: 'quart', category: 'volume', toBase: 0.946352946, aliases: ['qt', 'quarts'] }, // gallon / 4 for exact relationship
+  { name: 'pint', category: 'volume', toBase: 0.473176473, aliases: ['pt', 'pints'] }, // quart / 2
+  { name: 'cup', category: 'volume', toBase: 0.2365882365, aliases: ['cups'] }, // pint / 2
+  { name: 'fluid_ounce', category: 'volume', toBase: 0.0295735295625, aliases: ['fl_oz', 'floz', 'fluid_ounces'] }, // cup / 8
+];
+
+// Time units (base: second)
+const timeUnits: UnitDefinition[] = [
+  { name: 'second', category: 'time', toBase: 1, aliases: ['s', 'sec', 'seconds'] },
+  { name: 'minute', category: 'time', toBase: 60, aliases: ['min', 'minutes'] },
+  { name: 'hour', category: 'time', toBase: 3600, aliases: ['hr', 'hours'] },
+  { name: 'day', category: 'time', toBase: 86400, aliases: ['days'] },
+  { name: 'week', category: 'time', toBase: 604800, aliases: ['weeks'] },
+  { name: 'month', category: 'time', toBase: 2592000, aliases: ['months'] }, // 30 days
+  { name: 'year', category: 'time', toBase: 31536000, aliases: ['yr', 'years'] }, // 365 days
+];
+
+// Initialize unit registry
+[...lengthUnits, ...weightUnits, ...temperatureUnits, ...volumeUnits, ...timeUnits].forEach(unit => {
+  unitRegistry.set(unit.name.toLowerCase(), unit);
+  unit.aliases.forEach(alias => {
+    unitRegistry.set(alias.toLowerCase(), unit);
+  });
+});
+
+/**
+ * Normalize unit name (handle aliases and case)
+ */
+function normalizeUnit(unit: string): UnitDefinition {
+  const normalized = unit.toLowerCase();
+  const unitDef = unitRegistry.get(normalized);
+  if (!unitDef) {
+    throw new Error(`Unknown unit: ${unit}`);
+  }
+  return unitDef;
+}
+
+/**
+ * Convert temperature between units
+ */
+function convertTemperature(value: number, fromUnit: string, toUnit: string): number {
+  const from = fromUnit.toLowerCase();
+  const to = toUnit.toLowerCase();
+
+  // Convert to Celsius first
+  let celsius: number;
+  if (from === 'celsius' || from === 'c') {
+    celsius = value;
+  } else if (from === 'fahrenheit' || from === 'f') {
+    celsius = (value - 32) * 5 / 9;
+  } else if (from === 'kelvin' || from === 'k') {
+    celsius = value - 273.15;
+  } else {
+    throw new Error(`Unknown temperature unit: ${fromUnit}`);
+  }
+
+  // Convert from Celsius to target unit
+  if (to === 'celsius' || to === 'c') {
+    return celsius;
+  } else if (to === 'fahrenheit' || to === 'f') {
+    return (celsius * 9 / 5) + 32;
+  } else if (to === 'kelvin' || to === 'k') {
+    return celsius + 273.15;
+  } else {
+    throw new Error(`Unknown temperature unit: ${toUnit}`);
+  }
+}
+
+/**
+ * Convert value between units
+ */
+function convertUnit(value: number, fromUnit: string, toUnit: string): number {
+  const fromDef = normalizeUnit(fromUnit);
+  const toDef = normalizeUnit(toUnit);
+
+  // Check if units are in the same category
+  if (fromDef.category !== toDef.category) {
+    throw new Error(`Cannot convert between ${fromDef.name} and ${toDef.name} (different unit categories)`);
+  }
+
+  // Handle temperature conversions specially
+  if (fromDef.category === 'temperature') {
+    return convertTemperature(value, fromUnit, toUnit);
+  }
+
+  // For other units: convert to base unit, then to target unit
+  // value_in_base = value * fromDef.toBase
+  // result = value_in_base / toDef.toBase
+  if (fromDef.name === toDef.name) {
+    return value; // Same unit, no conversion needed
+  }
+
+  const valueInBase = value * fromDef.toBase;
+  return valueInBase / toDef.toBase;
+}
 
 /**
  * Mathematical operations
@@ -732,6 +885,17 @@ export const operations: Record<string, ((...args: any[]) => number | string)> =
     // Apply LCM pairwise: LCM(a, b, c) = LCM(LCM(a, b), c)
     return numbers.reduce((acc, num) => lcmTwo(acc, num));
   },
+
+  // Unit conversion operation (requires exactly 3 arguments: value, from_unit, to_unit)
+  convert: (value: number, fromUnit: string, toUnit: string): number => {
+    if (typeof value !== 'number' || isNaN(value)) {
+      throw new Error('First argument must be a valid number');
+    }
+    if (typeof fromUnit !== 'string' || typeof toUnit !== 'string') {
+      throw new Error('Second and third arguments must be unit names (strings)');
+    }
+    return convertUnit(value, fromUnit, toUnit);
+  },
 };
 
 /**
@@ -799,6 +963,24 @@ export function executeOperation(
   }
 
   const operationFn = operations[operation];
+  
+  // Handle convert operation specially (requires exactly 3 arguments: number, string, string)
+  if (operation === 'convert') {
+    if (args.length !== 3) {
+      throw new Error('Exactly 3 arguments are required');
+    }
+    if (typeof args[0] !== 'number' || isNaN(args[0])) {
+      throw new Error('First argument must be a valid number');
+    }
+    if (typeof args[1] !== 'string' || typeof args[2] !== 'string') {
+      throw new Error('Second and third arguments must be unit names (strings)');
+    }
+    const result = operationFn(args[0] as number, args[1] as string, args[2] as string);
+    return {
+      result,
+      operation,
+    };
+  }
   
   // Check if operation is unary (requires exactly 1 argument)
   if (isUnaryOperation(operation)) {
