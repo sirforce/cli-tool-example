@@ -39,6 +39,10 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Divide the first number by the second number',
     example: 'calc divide 20 4',
   },
+  pow: {
+    description: 'Raise the first number to the power of the second number',
+    example: 'calc pow 2 3',
+  },
 };
 
 /**
@@ -57,6 +61,8 @@ export const operations: Record<string, Operation> = {
     }
     return num1 / num2;
   },
+  
+  pow: (num1: number, num2: number): number => num1 ** num2,
 };
 
 /**
