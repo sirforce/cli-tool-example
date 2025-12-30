@@ -1,0 +1,29 @@
+{
+  "name": "cli-tool-example",
+  "version": "1.0.0",
+  "description": "A CLI tool to add two numbers together",
+  "main": "dist/index.js",
+  "bin": {
+    "add": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [
+    "cli",
+    "calculator"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
+
