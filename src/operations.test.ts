@@ -890,5 +890,283 @@ describe('operations', () => {
       expect(() => parseNumbersArray([], 2)).toThrow('At least 2 numbers are required');
     });
   });
+
+  // ============================================================================
+  // Spec 004: Number System Conversions
+  // ============================================================================
+
+  // Test Suite 1: Convert to Binary
+  describe('tobinary operation', () => {
+    it('should convert small decimal to binary (Test 1.1)', () => {
+      const result = executeOperation('tobinary', 10);
+      expect(result.result).toBe('1010');
+      expect(result.operation).toBe('tobinary');
+    });
+
+    it('should convert zero to binary (Test 1.2)', () => {
+      const result = executeOperation('tobinary', 0);
+      expect(result.result).toBe('0');
+    });
+
+    it('should convert one to binary (Test 1.3)', () => {
+      const result = executeOperation('tobinary', 1);
+      expect(result.result).toBe('1');
+    });
+
+    it('should convert large number to binary (Test 1.4)', () => {
+      const result = executeOperation('tobinary', 255);
+      expect(result.result).toBe('11111111');
+    });
+
+    it('should convert power of two (Test 1.5)', () => {
+      const result = executeOperation('tobinary', 256);
+      expect(result.result).toBe('100000000');
+    });
+
+    it('should handle negative number (Test 1.6)', () => {
+      // Spec says error or two's complement - we'll convert absolute value with minus sign
+      const result = executeOperation('tobinary', -5);
+      expect(result.result).toBe('-101');
+    });
+
+    it('should throw error for decimal number (Test 1.7)', () => {
+      expect(() => executeOperation('tobinary', 10.5)).toThrow('Only integers can be converted to binary');
+    });
+
+    it('should throw error for invalid number format (Test 1.8)', () => {
+      // This will be caught at parseNumbersArray level
+      expect(() => parseNumbersArray(['abc'], 1)).toThrow();
+    });
+  });
+
+  // Test Suite 2: Convert to Hexadecimal
+  describe('tohex operation', () => {
+    it('should convert small decimal to hex (Test 2.1)', () => {
+      const result = executeOperation('tohex', 10);
+      expect(result.result).toBe('A');
+      expect(result.operation).toBe('tohex');
+    });
+
+    it('should convert zero to hex (Test 2.2)', () => {
+      const result = executeOperation('tohex', 0);
+      expect(result.result).toBe('0');
+    });
+
+    it('should convert large number to hex (Test 2.3)', () => {
+      const result = executeOperation('tohex', 255);
+      expect(result.result).toBe('FF');
+    });
+
+    it('should convert power of 16 (Test 2.4)', () => {
+      const result = executeOperation('tohex', 256);
+      expect(result.result).toBe('100');
+    });
+
+    it('should convert number requiring multiple hex digits (Test 2.5)', () => {
+      const result = executeOperation('tohex', 4095);
+      expect(result.result).toBe('FFF');
+    });
+
+    it('should throw error for decimal number (Test 2.6)', () => {
+      expect(() => executeOperation('tohex', 10.5)).toThrow('Only integers can be converted to hexadecimal');
+    });
+
+    it('should throw error for invalid number format (Test 2.7)', () => {
+      expect(() => parseNumbersArray(['abc'], 1)).toThrow();
+    });
+  });
+
+  // Test Suite 3: Convert to Octal
+  describe('tooctal operation', () => {
+    it('should convert small decimal to octal (Test 3.1)', () => {
+      const result = executeOperation('tooctal', 10);
+      expect(result.result).toBe('12');
+      expect(result.operation).toBe('tooctal');
+    });
+
+    it('should convert zero to octal (Test 3.2)', () => {
+      const result = executeOperation('tooctal', 0);
+      expect(result.result).toBe('0');
+    });
+
+    it('should convert power of 8 (Test 3.3)', () => {
+      const result = executeOperation('tooctal', 64);
+      expect(result.result).toBe('100');
+    });
+
+    it('should convert number requiring multiple octal digits (Test 3.4)', () => {
+      const result = executeOperation('tooctal', 511);
+      expect(result.result).toBe('777');
+    });
+
+    it('should throw error for decimal number (Test 3.5)', () => {
+      expect(() => executeOperation('tooctal', 10.5)).toThrow('Only integers can be converted to octal');
+    });
+
+    it('should throw error for invalid number format (Test 3.6)', () => {
+      expect(() => parseNumbersArray(['abc'], 1)).toThrow();
+    });
+  });
+
+  // Test Suite 4: Convert from Binary
+  describe('frombinary operation', () => {
+    it('should convert small binary to decimal (Test 4.1)', () => {
+      const result = executeOperation('frombinary', '1010' as any);
+      expect(result.result).toBe(10);
+      expect(result.operation).toBe('frombinary');
+    });
+
+    it('should convert zero from binary (Test 4.2)', () => {
+      const result = executeOperation('frombinary', '0' as any);
+      expect(result.result).toBe(0);
+    });
+
+    it('should convert one from binary (Test 4.3)', () => {
+      const result = executeOperation('frombinary', '1' as any);
+      expect(result.result).toBe(1);
+    });
+
+    it('should convert large binary to decimal (Test 4.4)', () => {
+      const result = executeOperation('frombinary', '11111111' as any);
+      expect(result.result).toBe(255);
+    });
+
+    it('should convert binary with prefix (Test 4.5)', () => {
+      const result = executeOperation('frombinary', '0b1010' as any);
+      expect(result.result).toBe(10);
+    });
+
+    it('should throw error for invalid binary format - non-binary digits (Test 4.6)', () => {
+      expect(() => executeOperation('frombinary', '1012' as any)).toThrow('Invalid binary format. Binary numbers can only contain 0 and 1');
+    });
+
+    it('should throw error for invalid binary format - contains letters (Test 4.7)', () => {
+      expect(() => executeOperation('frombinary', 'abc' as any)).toThrow('Invalid binary format. Binary numbers can only contain 0 and 1');
+    });
+
+    it('should throw error for empty input (Test 4.8)', () => {
+      expect(() => executeOperation('frombinary', '' as any)).toThrow();
+    });
+  });
+
+  // Test Suite 5: Convert from Hexadecimal
+  describe('fromhex operation', () => {
+    it('should convert small hex to decimal (Test 5.1)', () => {
+      const result = executeOperation('fromhex', 'A' as any);
+      expect(result.result).toBe(10);
+      expect(result.operation).toBe('fromhex');
+    });
+
+    it('should convert hex with lowercase (Test 5.2)', () => {
+      const result = executeOperation('fromhex', 'a' as any);
+      expect(result.result).toBe(10);
+    });
+
+    it('should convert large hex to decimal (Test 5.3)', () => {
+      const result = executeOperation('fromhex', 'FF' as any);
+      expect(result.result).toBe(255);
+    });
+
+    it('should convert hex with prefix (Test 5.4)', () => {
+      const result = executeOperation('fromhex', '0xFF' as any);
+      expect(result.result).toBe(255);
+    });
+
+    it('should convert hex with lowercase prefix (Test 5.5)', () => {
+      const result = executeOperation('fromhex', '0xff' as any);
+      expect(result.result).toBe(255);
+    });
+
+    it('should convert multi-digit hex (Test 5.6)', () => {
+      const result = executeOperation('fromhex', '1A2B' as any);
+      expect(result.result).toBe(6699);
+    });
+
+    it('should throw error for invalid hex format - invalid character (Test 5.7)', () => {
+      expect(() => executeOperation('fromhex', 'G' as any)).toThrow('Invalid hexadecimal format. Hexadecimal numbers can only contain 0-9 and A-F');
+    });
+
+    it('should throw error for invalid hex format - contains non-hex characters (Test 5.8)', () => {
+      expect(() => executeOperation('fromhex', '12G' as any)).toThrow('Invalid hexadecimal format. Hexadecimal numbers can only contain 0-9 and A-F');
+    });
+  });
+
+  // Test Suite 6: Convert from Octal
+  describe('fromoctal operation', () => {
+    it('should convert small octal to decimal (Test 6.1)', () => {
+      const result = executeOperation('fromoctal', '12' as any);
+      expect(result.result).toBe(10);
+      expect(result.operation).toBe('fromoctal');
+    });
+
+    it('should convert zero from octal (Test 6.2)', () => {
+      const result = executeOperation('fromoctal', '0' as any);
+      expect(result.result).toBe(0);
+    });
+
+    it('should convert large octal to decimal (Test 6.3)', () => {
+      const result = executeOperation('fromoctal', '777' as any);
+      expect(result.result).toBe(511);
+    });
+
+    it('should convert octal with prefix (Test 6.4)', () => {
+      const result = executeOperation('fromoctal', '0o12' as any);
+      expect(result.result).toBe(10);
+    });
+
+    it('should convert octal with uppercase prefix (Test 6.5)', () => {
+      const result = executeOperation('fromoctal', '0O12' as any);
+      expect(result.result).toBe(10);
+    });
+
+    it('should throw error for invalid octal format - contains invalid digits (Test 6.6)', () => {
+      expect(() => executeOperation('fromoctal', '89' as any)).toThrow('Invalid octal format. Octal numbers can only contain 0-7');
+    });
+
+    it('should throw error for invalid octal format - contains letters (Test 6.7)', () => {
+      expect(() => executeOperation('fromoctal', 'abc' as any)).toThrow('Invalid octal format. Octal numbers can only contain 0-7');
+    });
+  });
+
+  // Test Suite 7: Round-Trip Conversions
+  describe('round-trip conversions', () => {
+    it('should round-trip decimal to binary to decimal (Test 7.1)', () => {
+      const binaryResult = executeOperation('tobinary', 42);
+      expect(binaryResult.result).toBe('101010');
+      const decimalResult = executeOperation('frombinary', binaryResult.result as any);
+      expect(decimalResult.result).toBe(42);
+    });
+
+    it('should round-trip decimal to hex to decimal (Test 7.2)', () => {
+      const hexResult = executeOperation('tohex', 255);
+      expect(hexResult.result).toBe('FF');
+      const decimalResult = executeOperation('fromhex', hexResult.result as any);
+      expect(decimalResult.result).toBe(255);
+    });
+
+    it('should round-trip decimal to octal to decimal (Test 7.3)', () => {
+      const octalResult = executeOperation('tooctal', 64);
+      expect(octalResult.result).toBe('100');
+      const decimalResult = executeOperation('fromoctal', octalResult.result as any);
+      expect(decimalResult.result).toBe(64);
+    });
+  });
+
+  // Test Suite 8: Edge Cases
+  describe('number system conversions edge cases', () => {
+    it('should handle very large number (Test 8.1)', () => {
+      const result = executeOperation('tobinary', 4294967295);
+      expect(result.result).toBe('11111111111111111111111111111111');
+    });
+
+    it('should handle maximum safe integer (Test 8.2)', () => {
+      const result = executeOperation('tohex', 9007199254740991);
+      expect(result.result).toBe('1FFFFFFFFFFFFF');
+    });
+
+    it('should throw error for missing argument (Test 8.3)', () => {
+      expect(() => executeOperation('tobinary')).toThrow('Exactly 1 number is required');
+    });
+  });
 });
 

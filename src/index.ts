@@ -34,14 +34,25 @@ program
       // Determine minimum number of arguments required based on operation type
       const minCount = isUnaryOperation(operation) ? 1 : 2;
 
-      // Validate and parse numbers
-      const validatedNumbers = parseNumbersArray(numbers, minCount);
-
-      // Execute operation
-      const { result, operation: op, modes } = executeOperation(operation, ...validatedNumbers);
+      // Check if this is a "from" operation (needs string input)
+      const isFromOperation = operation === 'frombinary' || operation === 'fromhex' || operation === 'fromoctal';
+      
+      let result: { result: number | string; operation: string; modes?: number[] };
+      
+      if (isFromOperation) {
+        // For "from" operations, pass the raw string argument
+        if (numbers.length < minCount) {
+          throw new Error(`At least ${minCount} argument${minCount > 1 ? 's' : ''} ${minCount > 1 ? 'are' : 'is'} required`);
+        }
+        result = executeOperation(operation, numbers[0] as any);
+      } else {
+        // For other operations, parse numbers normally
+        const validatedNumbers = parseNumbersArray(numbers, minCount);
+        result = executeOperation(operation, ...validatedNumbers);
+      }
 
       // Display result
-      console.log(formatResult(op, result, modes));
+      console.log(formatResult(result.operation, result.result, result.modes));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       console.error(`Error: ${errorMessage}`);

@@ -1,3 +1,5 @@
+import { parseIntegerNumber, parseBinaryNumber, parseHexNumber, parseOctalNumber } from './utils';
+
 /**
  * Type definition for binary mathematical operations
  */
@@ -22,7 +24,7 @@ export type Operation = BinaryOperation | UnaryOperation | NAryOperation;
  * Operation result interface
  */
 export interface OperationResult {
-  result: number;
+  result: number | string;
   operation: string;
   modes?: number[]; // For mode operation when multiple modes exist
 }
@@ -139,12 +141,36 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
     description: 'Calculate the range (max - min) of multiple numbers',
     example: 'calc range 1 5 3',
   },
+  tobinary: {
+    description: 'Convert a decimal number to its binary representation',
+    example: 'calc tobinary 10',
+  },
+  tohex: {
+    description: 'Convert a decimal number to its hexadecimal representation',
+    example: 'calc tohex 255',
+  },
+  tooctal: {
+    description: 'Convert a decimal number to its octal representation',
+    example: 'calc tooctal 10',
+  },
+  frombinary: {
+    description: 'Convert a binary number to its decimal representation',
+    example: 'calc frombinary 1010',
+  },
+  fromhex: {
+    description: 'Convert a hexadecimal number to its decimal representation',
+    example: 'calc fromhex FF',
+  },
+  fromoctal: {
+    description: 'Convert an octal number to its decimal representation',
+    example: 'calc fromoctal 12',
+  },
 };
 
 /**
  * Set of unary operations (require exactly 1 argument)
  */
-const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'abs', 'ceil', 'floor', 'round']);
+const unaryOperations = new Set(['sqrt', 'log', 'log10', 'sin', 'cos', 'tan', 'abs', 'ceil', 'floor', 'round', 'tobinary', 'tohex', 'tooctal', 'frombinary', 'fromhex', 'fromoctal']);
 
 /**
  * Set of n-ary operations (require 2+ arguments)
@@ -155,8 +181,9 @@ const nAryOperations = new Set(['add', 'subtract', 'multiply', 'divide', 'pow', 
 /**
  * Mathematical operations
  * Supports both unary (1 argument) and n-ary (2+ arguments) operations
+ * Also supports conversion operations that take strings or return strings
  */
-export const operations: Record<string, ((...args: number[]) => number)> = {
+export const operations: Record<string, ((...args: any[]) => number | string)> = {
   add: (...numbers: number[]): number => {
     if (numbers.length < 2) {
       throw new Error('At least 2 numbers are required');
@@ -357,6 +384,68 @@ export const operations: Record<string, ((...args: number[]) => number)> = {
     const min = Math.min(...numbers);
     return max - min;
   },
+
+  // Number system conversion operations (unary, return strings for "to" operations)
+  tobinary: (num: number): string => {
+    // Validate integer
+    if (!Number.isInteger(num)) {
+      throw new Error('Only integers can be converted to binary');
+    }
+    
+    // Handle negative numbers
+    const isNegative = num < 0;
+    const absNum = Math.abs(num);
+    
+    // Convert to binary
+    const binary = absNum.toString(2);
+    
+    return isNegative ? `-${binary}` : binary;
+  },
+
+  tohex: (num: number): string => {
+    // Validate integer
+    if (!Number.isInteger(num)) {
+      throw new Error('Only integers can be converted to hexadecimal');
+    }
+    
+    // Handle negative numbers
+    const isNegative = num < 0;
+    const absNum = Math.abs(num);
+    
+    // Convert to hex (uppercase)
+    const hex = absNum.toString(16).toUpperCase();
+    
+    return isNegative ? `-${hex}` : hex;
+  },
+
+  tooctal: (num: number): string => {
+    // Validate integer
+    if (!Number.isInteger(num)) {
+      throw new Error('Only integers can be converted to octal');
+    }
+    
+    // Handle negative numbers
+    const isNegative = num < 0;
+    const absNum = Math.abs(num);
+    
+    // Convert to octal
+    const octal = absNum.toString(8);
+    
+    return isNegative ? `-${octal}` : octal;
+  },
+
+  // Number system conversion operations (unary, accept strings for "from" operations)
+  frombinary: (str: string): number => {
+    return parseBinaryNumber(str);
+  },
+
+  fromhex: (str: string): number => {
+    return parseHexNumber(str);
+  },
+
+  fromoctal: (str: string): number => {
+    return parseOctalNumber(str);
+  },
 };
 
 /**
@@ -417,7 +506,7 @@ export const isValidOperation = (operation: string): boolean => {
  */
 export function executeOperation(
   operation: string,
-  ...args: number[]
+  ...args: (number | string)[]
 ): OperationResult {
   if (!isValidOperation(operation)) {
     throw new Error(`Unknown operation: ${operation}`);
@@ -430,8 +519,20 @@ export function executeOperation(
     if (args.length !== 1) {
       throw new Error('Exactly 1 number is required');
     }
+    
+    // Handle "from" operations that accept strings
+    const isFromOperation = operation === 'frombinary' || operation === 'fromhex' || operation === 'fromoctal';
+    if (isFromOperation) {
+      const result = operationFn(args[0] as string);
+      return {
+        result,
+        operation,
+      };
+    }
+    
+    // Handle "to" operations that accept numbers
     const unaryFn = operationFn as UnaryOperation;
-    const result = unaryFn(args[0]);
+    const result = unaryFn(args[0] as number);
     return {
       result,
       operation,
@@ -443,13 +544,21 @@ export function executeOperation(
     throw new Error('At least 2 numbers are required');
   }
   
+  // Ensure all args are numbers for n-ary operations
+  const numberArgs = args.map(arg => {
+    if (typeof arg === 'string') {
+      throw new Error('N-ary operations require numeric arguments');
+    }
+    return arg;
+  });
+  
   const nAryFn = operationFn as NAryOperation;
-  const result = nAryFn(...args);
+  const result = nAryFn(...numberArgs);
   
   // Special handling for mode operation to return modes array
   if (operation === 'mode') {
     const frequency: Map<number, number> = new Map();
-    args.forEach(num => {
+    numberArgs.forEach(num => {
       frequency.set(num, (frequency.get(num) || 0) + 1);
     });
     const maxFreq = Math.max(...Array.from(frequency.values()));
@@ -459,7 +568,7 @@ export function executeOperation(
       .sort((a, b) => a - b); // Sort for consistent output
     
     // Return modes array if: multiple modes exist, or all values are unique (all have frequency 1)
-    const shouldReturnModes = modes.length > 1 || (modes.length === frequency.size && maxFreq === 1 && args.length > 1);
+    const shouldReturnModes = modes.length > 1 || (modes.length === frequency.size && maxFreq === 1 && numberArgs.length > 1);
     
     return {
       result,
