@@ -5,9 +5,10 @@ import {
   executeOperation, 
   getAvailableOperations, 
   isValidOperation,
-  getAllOperationsWithDescriptions 
+  getAllOperationsWithDescriptions,
+  isUnaryOperation
 } from './operations';
-import { parseNumbers, formatResult } from './utils';
+import { parseNumbers, formatResult, parseNumbersArray } from './utils';
 
 const program = new Command();
 
@@ -15,10 +16,13 @@ program
   .name('calc')
   .description('A CLI tool for basic mathematical operations')
   .version('1.0.0')
+  .allowUnknownOption(true) // Allow negative numbers to be parsed as arguments
   .argument('<operation>', `Operation to perform: ${getAvailableOperations().join(', ')}`)
-  .argument('<num1>', 'First number', parseFloat)
-  .argument('<num2>', 'Second number', parseFloat)
-  .action((operation: string, num1: number, num2: number) => {
+  .argument('<numbers...>', 'Numbers to operate on', (value, prev: string[] = []) => {
+    prev.push(value);
+    return prev;
+  })
+  .action((operation: string, numbers: string[]) => {
     try {
       // Validate operation
       if (!isValidOperation(operation)) {
@@ -27,11 +31,14 @@ program
         process.exit(1);
       }
 
-      // Validate numbers
-      const [validatedNum1, validatedNum2] = parseNumbers(num1.toString(), num2.toString());
+      // Determine minimum number of arguments required based on operation type
+      const minCount = isUnaryOperation(operation) ? 1 : 2;
+
+      // Validate and parse numbers
+      const validatedNumbers = parseNumbersArray(numbers, minCount);
 
       // Execute operation
-      const { result, operation: op } = executeOperation(operation, validatedNum1, validatedNum2);
+      const { result, operation: op } = executeOperation(operation, ...validatedNumbers);
 
       // Display result
       console.log(formatResult(op, result));

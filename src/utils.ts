@@ -21,6 +21,33 @@ export const parseNumbers = (num1Str: string, num2Str: string): [number, number]
 };
 
 /**
+ * Parse and validate a single number argument
+ */
+export const parseNumber = (numStr: string): number => {
+  const num = parseFloat(numStr);
+  validateNumber(num, 'Number');
+  return num;
+};
+
+/**
+ * Parse and validate variable-length number arguments
+ * Supports both unary (1+) and n-ary (2+) operations
+ */
+export const parseNumbersArray = (numberStrings: string[], minCount: number = 2): number[] => {
+  if (numberStrings.length < minCount) {
+    throw new Error(`At least ${minCount} number${minCount > 1 ? 's' : ''} ${minCount > 1 ? 'are' : 'is'} required`);
+  }
+
+  const numbers = numberStrings.map((str, index) => {
+    const num = parseFloat(str);
+    validateNumber(num, `Number at position ${index + 1}`);
+    return num;
+  });
+
+  return numbers;
+};
+
+/**
  * Format operation result for display
  */
 export const formatResult = (operation: string, result: number): string => {
