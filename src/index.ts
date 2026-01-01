@@ -39,8 +39,20 @@ program
       const isFromOperation = operation === 'frombinary' || operation === 'fromhex' || operation === 'fromoctal';
       const isEvalOperation = operation === 'eval';
       const isConvertOperation = operation === 'convert';
+      const isSequenceOperation = operation === 'fibonacci' || operation === 'arithmetic' || operation === 'geometric';
+      const isPrimeCountOperation = operation === 'primes' && numbers[0] === '--count';
+      const isRandomIntegerFlag = operation === 'random' && numbers.includes('--integer');
+      const isRiemannOperation = operation === 'riemann';
       
       let result: { result: number | string; operation: string; modes?: number[] };
+
+      const parseNum = (value: string, name: string): number => {
+        const n = parseFloat(value);
+        if (Number.isNaN(n)) {
+          throw new Error(`Invalid number format for ${name}: ${value}`);
+        }
+        return n;
+      };
       
       if (isFromOperation) {
         // For "from" operations, pass the raw string argument
@@ -65,6 +77,56 @@ program
           throw new Error(`Invalid number format: ${numbers[0]}`);
         }
         result = executeOperation(operation, value, numbers[1], numbers[2]);
+      } else if (isPrimeCountOperation) {
+        if (numbers.length !== 2) {
+          throw new Error('Usage: calc primes --count <n>');
+        }
+        const count = parseNum(numbers[1], 'count');
+        result = executeOperation(operation, '--count' as any, count as any);
+      } else if (isRiemannOperation) {
+        if (numbers.length < 1 || numbers.length > 2) {
+          throw new Error('Usage: calc riemann <s> [terms]');
+        }
+        const s = parseNum(numbers[0], 's');
+        if (numbers.length === 2) {
+          const terms = parseNum(numbers[1], 'terms');
+          result = executeOperation(operation, s, terms);
+        } else {
+          result = executeOperation(operation, s);
+        }
+      } else if (isSequenceOperation) {
+        // Support --sequence flag for sequence operations
+        const hasSequence = numbers.includes('--sequence');
+        const cleaned = numbers.filter(n => n !== '--sequence');
+        
+        if (operation === 'fibonacci') {
+          if (cleaned.length !== 1) {
+            throw new Error(hasSequence ? 'Usage: calc fibonacci --sequence <n>' : 'Usage: calc fibonacci <n>');
+          }
+          const n = parseNum(cleaned[0], 'n');
+          result = hasSequence ? executeOperation(operation, n, '--sequence' as any) : executeOperation(operation, n);
+        } else {
+          // arithmetic/geometric
+          if (cleaned.length !== 3) {
+            throw new Error(hasSequence ? `Usage: calc ${operation} --sequence <first> <step_or_ratio> <count>` : `Usage: calc ${operation} <first> <step_or_ratio> <n>`);
+          }
+          const a = parseNum(cleaned[0], 'first');
+          const b = parseNum(cleaned[1], operation === 'arithmetic' ? 'difference' : 'ratio');
+          const c = parseNum(cleaned[2], hasSequence ? 'count' : 'n');
+          result = hasSequence ? executeOperation(operation, a, b, c, '--sequence' as any) : executeOperation(operation, a, b, c);
+        }
+      } else if (operation === 'random') {
+        // Support: calc random; calc random <min> <max>; calc random --integer <min> <max>
+        const cleaned = numbers.filter(n => n !== '--integer');
+        if (cleaned.length === 0) {
+          result = executeOperation(operation);
+        } else if (cleaned.length === 2) {
+          const min = parseNum(cleaned[0], 'min');
+          const max = parseNum(cleaned[1], 'max');
+          result = isRandomIntegerFlag ? executeOperation(operation, min, max, '--integer' as any) : executeOperation(operation, min, max);
+        } else {
+          throw new Error('Usage: calc random [--integer] <min> <max>');
+        }
       } else {
         // For other operations, parse numbers normally
         const validatedNumbers = parseNumbersArray(numbers, minCount);
