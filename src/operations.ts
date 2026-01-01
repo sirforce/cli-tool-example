@@ -324,7 +324,7 @@ export const operationDescriptions: Record<string, OperationMetadata> = {
   },
   // Spec 015: Random Number Generation
   random: {
-    description: 'Generate a random number between 0 and 1, or within a specified range',
+    description: 'Generate a random number between 0 and 1, or within a specified range (use --integer or --int for integer output)',
     example: 'calc random',
   },
   randomint: {
@@ -1738,7 +1738,7 @@ export const operations: Record<string, ((...args: any[]) => number | string)> =
 
   // Spec 015: Random Number Generation
   random: (min?: number, max?: number, ...args: any[]): number => {
-    const isInteger = args.length > 0 && args[0] === '--integer';
+    const isInteger = args.length > 0 && (args[0] === '--integer' || args[0] === '--int');
     
     // No arguments: return 0-1
     if (min === undefined) {

@@ -41,7 +41,7 @@ program
       const isConvertOperation = operation === 'convert';
       const isSequenceOperation = operation === 'fibonacci' || operation === 'arithmetic' || operation === 'geometric';
       const isPrimeCountOperation = operation === 'primes' && numbers[0] === '--count';
-      const isRandomIntegerFlag = operation === 'random' && numbers.includes('--integer');
+      const isRandomIntegerFlag = operation === 'random' && (numbers.includes('--integer') || numbers.includes('--int'));
       const isRiemannOperation = operation === 'riemann';
       
       let result: { result: number | string; operation: string; modes?: number[] };
@@ -116,16 +116,17 @@ program
           result = hasSequence ? executeOperation(operation, a, b, c, '--sequence' as any) : executeOperation(operation, a, b, c);
         }
       } else if (operation === 'random') {
-        // Support: calc random; calc random <min> <max>; calc random --integer <min> <max>
-        const cleaned = numbers.filter(n => n !== '--integer');
+        // Support: calc random; calc random <min> <max>; calc random [--integer|--int] <min> <max>
+        const integerFlag = numbers.includes('--integer') ? '--integer' : (numbers.includes('--int') ? '--int' : null);
+        const cleaned = numbers.filter(n => n !== '--integer' && n !== '--int');
         if (cleaned.length === 0) {
           result = executeOperation(operation);
         } else if (cleaned.length === 2) {
           const min = parseNum(cleaned[0], 'min');
           const max = parseNum(cleaned[1], 'max');
-          result = isRandomIntegerFlag ? executeOperation(operation, min, max, '--integer' as any) : executeOperation(operation, min, max);
+          result = isRandomIntegerFlag ? executeOperation(operation, min, max, integerFlag as any) : executeOperation(operation, min, max);
         } else {
-          throw new Error('Usage: calc random [--integer] <min> <max>');
+          throw new Error('Usage: calc random [--integer|--int] <min> <max>');
         }
       } else {
         // For other operations, parse numbers normally
@@ -198,7 +199,7 @@ program.addHelpText('after', () => {
     fibonacci: '                 Usage: calc fibonacci <n> OR calc fibonacci --sequence <n>',
     arithmetic: '                 Usage: calc arithmetic <first> <diff> <n> OR calc arithmetic --sequence <first> <diff> <count>',
     geometric: '                 Usage: calc geometric <first> <ratio> <n> OR calc geometric --sequence <first> <ratio> <count>',
-    random: '                 Usage: calc random OR calc random <min> <max> OR calc random --integer <min> <max>',
+    random: '                 Usage: calc random OR calc random <min> <max> OR calc random [--integer|--int] <min> <max>',
     riemann: '                 Usage: calc riemann <s> [terms] (terms is optional, defaults to 1000)',
     convert: '                 Usage: calc convert <value> <fromUnit> <toUnit>',
     eval: '                 Usage: calc eval "<expression>" (expression can contain spaces)',

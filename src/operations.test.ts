@@ -3217,6 +3217,48 @@ describe('operations', () => {
         expect(result.result).toBeGreaterThanOrEqual(0);
         expect(result.result).toBeLessThan(1);
       });
+
+      it('Test 1.8: Random with --integer flag', () => {
+        const result = executeOperation('random', 1, 10, '--integer');
+        expect(result.operation).toBe('random');
+        expect(Number.isInteger(result.result)).toBe(true);
+        expect(result.result).toBeGreaterThanOrEqual(1);
+        expect(result.result).toBeLessThan(10);
+      });
+
+      it('Test 1.9: Random with --int flag (alias)', () => {
+        const result = executeOperation('random', 1, 10, '--int');
+        expect(result.operation).toBe('random');
+        expect(Number.isInteger(result.result)).toBe(true);
+        expect(result.result).toBeGreaterThanOrEqual(1);
+        expect(result.result).toBeLessThan(10);
+      });
+
+      it('Test 1.10: Random with --int flag produces same behavior as --integer', () => {
+        // Set seed for reproducibility
+        executeOperation('seed', 12345);
+        const result1 = executeOperation('random', 1, 100, '--integer');
+        
+        executeOperation('seed', 12345);
+        const result2 = executeOperation('random', 1, 100, '--int');
+        
+        expect(Number.isInteger(result1.result)).toBe(true);
+        expect(Number.isInteger(result2.result)).toBe(true);
+        expect(result1.result).toBe(result2.result);
+      });
+
+      it('Test 1.11: Random with --int flag and negative range', () => {
+        const result = executeOperation('random', -10, -5, '--int');
+        expect(Number.isInteger(result.result)).toBe(true);
+        expect(result.result).toBeGreaterThanOrEqual(-10);
+        expect(result.result).toBeLessThan(-5);
+      });
+
+      it('Test 1.12: Random with --int flag single value', () => {
+        const result = executeOperation('random', 5, 5, '--int');
+        expect(result.result).toBe(5);
+        expect(Number.isInteger(result.result)).toBe(true);
+      });
     });
 
     describe('randomint operation', () => {

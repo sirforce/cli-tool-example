@@ -224,6 +224,7 @@ calc help
 - `calc random` - Random number between 0 and 1
 - `calc random <min> <max>` - Random number in range
 - `calc random --integer <min> <max>` - Random integer in range
+- `calc random --int <min> <max>` - Random integer in range (alias for --integer)
 - `calc randomlist <count> [min] [max]` - Generate list of random numbers
 
 ### Modular Arithmetic
@@ -439,6 +440,10 @@ calc random
 # Random integer
 calc randomint 1 100
 # Output: Randomint Math Result: 42
+
+# Random integer using --int flag (alias for --integer)
+calc random --int 1 100
+# Output: Random Math Result: 42
 
 # Seeded random
 calc seed 12345
