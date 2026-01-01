@@ -192,9 +192,24 @@ program.addHelpText('after', () => {
   const operations = getAllOperationsWithDescriptions();
   let helpText = '\nAvailable Operations:\n';
   
+  // Special operations that need additional usage notes
+  const specialUsageNotes: Record<string, string> = {
+    primes: '                 Usage: calc primes <limit> OR calc primes --count <n>',
+    fibonacci: '                 Usage: calc fibonacci <n> OR calc fibonacci --sequence <n>',
+    arithmetic: '                 Usage: calc arithmetic <first> <diff> <n> OR calc arithmetic --sequence <first> <diff> <count>',
+    geometric: '                 Usage: calc geometric <first> <ratio> <n> OR calc geometric --sequence <first> <ratio> <count>',
+    random: '                 Usage: calc random OR calc random <min> <max> OR calc random --integer <min> <max>',
+    riemann: '                 Usage: calc riemann <s> [terms] (terms is optional, defaults to 1000)',
+    convert: '                 Usage: calc convert <value> <fromUnit> <toUnit>',
+    eval: '                 Usage: calc eval "<expression>" (expression can contain spaces)',
+  };
+  
   operations.forEach(op => {
     helpText += `\n  ${op.name.padEnd(12)} ${op.description}\n`;
     helpText += `  ${' '.repeat(12)} Example: ${op.example}\n`;
+    if (specialUsageNotes[op.name]) {
+      helpText += `  ${specialUsageNotes[op.name]}\n`;
+    }
   });
   
   helpText += '\nBatch Operations:\n';

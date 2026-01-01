@@ -11,6 +11,14 @@ A comprehensive command-line interface (CLI) tool built with Node.js and TypeScr
 - 📈 **Percentage Calculations**: Various percentage operations
 - 🎲 **Combinatorics**: Factorial, combinations, permutations
 - 🔧 **GCD/LCM**: Greatest common divisor and least common multiple
+- 💰 **Financial Calculations**: Future value, present value, loan payments, ROI, APR
+- 🔢 **Prime Number Operations**: Prime checking, factorization, totient function
+- 📐 **Sequence Operations**: Fibonacci, arithmetic, geometric sequences
+- 📍 **Coordinate Geometry**: Distance, midpoint, slope, area, perimeter calculations
+- 🎲 **Random Number Generation**: Random numbers with seed support
+- 🔐 **Modular Arithmetic**: Modular operations, Chinese Remainder Theorem
+- 📈 **Series Calculations**: Taylor series, harmonic series, Riemann zeta
+- 🧮 **Calculus Approximations**: Derivatives, integrals, roots, limits, optimization
 - 📐 **Unit Conversions**: Length, weight, temperature, volume, time conversions
 - 🧪 **Expression Evaluation**: Evaluate complex mathematical expressions
 - 📁 **Batch Processing**: Process numbers from text, CSV, and JSON files
@@ -149,6 +157,109 @@ calc help
 | `gcd` | Calculate greatest common divisor | `calc gcd 48 18` |
 | `lcm` | Calculate least common multiple | `calc lcm 4 6` |
 
+### Financial Calculations
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `fv` | Calculate the future value of an investment with compound interest | `calc fv 1000 0.05 10` |
+| `pv` | Calculate the present value of a future amount (discounting) | `calc pv 1628.89 0.05 10` |
+| `pmt` | Calculate the periodic payment for a loan (annuity payment) | `calc pmt 100000 0.005 360` |
+| `compound` | Calculate the final amount after compound interest | `calc compound 1000 0.05 10` |
+| `apr` | Calculate the APR from periodic rate and compounding frequency | `calc apr 0.005 12` |
+| `roi` | Calculate the return on investment percentage | `calc roi 1000 1500` |
+
+### Prime Number Operations
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `isprime` | Determine whether a number is prime | `calc isprime 7` |
+| `primefactors` | Find all prime factors of a number | `calc primefactors 12` |
+| `nextprime` | Find the next prime number greater than the given number | `calc nextprime 10` |
+| `prevprime` | Find the previous prime number less than the given number | `calc prevprime 10` |
+| `primes` | Generate a list of prime numbers up to a given limit | `calc primes 20` |
+| `totient` | Calculate Euler's totient function φ(n) | `calc totient 10` |
+
+**Special Usage:**
+- `calc primes <limit>` - Generate primes up to limit
+- `calc primes --count <n>` - Generate first n primes
+
+### Sequence Operations
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `fibonacci` | Generate Fibonacci numbers or find the nth Fibonacci number | `calc fibonacci 10` |
+| `arithmetic` | Generate terms or find the nth term of an arithmetic sequence | `calc arithmetic 5 3 10` |
+| `geometric` | Generate terms or find the nth term of a geometric sequence | `calc geometric 2 3 5` |
+| `sumarithmetic` | Calculate the sum of the first n terms of an arithmetic sequence | `calc sumarithmetic 2 3 5` |
+| `sumgeometric` | Calculate the sum of the first n terms of a geometric sequence | `calc sumgeometric 1 2 5` |
+| `triangular` | Generate triangular numbers (sum of first n natural numbers) | `calc triangular 10` |
+
+**Special Usage:**
+- `calc fibonacci --sequence <n>` - Generate first n Fibonacci numbers
+- `calc arithmetic --sequence <first> <diff> <count>` - Generate arithmetic sequence
+- `calc geometric --sequence <first> <ratio> <count>` - Generate geometric sequence
+
+### Coordinate Geometry
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `distance` | Calculate the Euclidean distance between two points in 2D or 3D space | `calc distance 0 0 3 4` |
+| `midpoint` | Find the midpoint between two points | `calc midpoint 0 0 4 4` |
+| `slope` | Calculate the slope of a line passing through two points | `calc slope 0 0 2 4` |
+| `area` | Calculate the area of a polygon given its vertices (using shoelace formula) | `calc area 0 0 4 0 4 4 0 4` |
+| `perimeter` | Calculate the perimeter of a polygon given its vertices | `calc perimeter 0 0 4 0 4 4 0 4` |
+| `circlearea` | Calculate the area of a circle given its radius | `calc circlearea 5` |
+| `circumference` | Calculate the circumference of a circle given its radius | `calc circumference 5` |
+
+### Random Number Generation
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `random` | Generate a random number between 0 and 1, or within a specified range | `calc random` |
+| `randomint` | Generate a random integer within a specified range | `calc randomint 1 100` |
+| `randomlist` | Generate a list of random numbers | `calc randomlist 10` |
+| `seed` | Set the seed for the random number generator (for reproducibility) | `calc seed 12345` |
+
+**Special Usage:**
+- `calc random` - Random number between 0 and 1
+- `calc random <min> <max>` - Random number in range
+- `calc random --integer <min> <max>` - Random integer in range
+- `calc randomlist <count> [min] [max]` - Generate list of random numbers
+
+### Modular Arithmetic
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `mod` | Calculate the remainder when dividing one number by another | `calc mod 10 3` |
+| `modpow` | Calculate (base^exponent) mod modulus efficiently | `calc modpow 2 10 7` |
+| `modinv` | Find the modular multiplicative inverse of a number | `calc modinv 3 11` |
+| `congruent` | Check if two numbers are congruent modulo m | `calc congruent 10 3 7` |
+| `crt` | Solve a system of congruences using the Chinese Remainder Theorem | `calc crt 2 3 3 5` |
+
+### Series Calculations
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `series` | Calculate the sum of a series given a formula or pattern | `calc series arithmetic 1 1 100` |
+| `taylor` | Approximate a function using its Taylor series expansion | `calc taylor exp 1 10` |
+| `harmonic` | Calculate the nth harmonic number or sum of harmonic series | `calc harmonic 10` |
+| `riemann` | Approximate the Riemann zeta function ζ(s) for real s > 1 | `calc riemann 2` |
+| `fibonaccisum` | Calculate the sum of the first n Fibonacci numbers | `calc fibonaccisum 10` |
+
+**Special Usage:**
+- `calc riemann <s> [terms]` - Riemann zeta function (terms defaults to 1000)
+
+### Calculus Approximations
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| `derivative` | Approximate the derivative of a function at a point using numerical methods | `calc derivative x^2 3` |
+| `integrate` | Approximate the definite integral of a function using numerical methods | `calc integrate x^2 0 2` |
+| `root` | Find a root of a function using numerical methods | `calc root x^2-4 1` |
+| `limit` | Approximate the limit of a function as x approaches a value | `calc limit (x^2-4)/(x-2) 2` |
+| `maximize` | Find the maximum value of a function in a given interval | `calc maximize -x^2+4 0 5` |
+| `minimize` | Find the minimum value of a function in a given interval | `calc minimize x^2 0 5` |
+
 ### Unit Conversions
 
 | Operation | Description | Example |
@@ -252,6 +363,120 @@ calc stddev 2 4 6 8 10
 # Find maximum
 calc max 1 5 3 9 2
 # Output: Max Math Result: 9
+```
+
+### Financial Calculations
+
+```bash
+# Future value
+calc fv 1000 0.05 10
+# Output: Fv Math Result: 1628.894626777442
+
+# Loan payment
+calc pmt 100000 0.005 360
+# Output: Pmt Math Result: 599.5505251537783
+
+# ROI
+calc roi 1000 1500
+# Output: Roi Math Result: 50
+```
+
+### Prime Numbers
+
+```bash
+# Check if prime
+calc isprime 17
+# Output: Isprime Math Result: 1
+
+# Find prime factors
+calc primefactors 60
+# Output: Primefactors Math Result: 2,2,3,5
+
+# Generate primes
+calc primes 20
+# Output: Primes Math Result: 2,3,5,7,11,13,17,19
+```
+
+### Sequences
+
+```bash
+# Fibonacci number
+calc fibonacci 10
+# Output: Fibonacci Math Result: 55
+
+# Fibonacci sequence
+calc fibonacci --sequence 10
+# Output: Fibonacci Math Result: 0,1,1,2,3,5,8,13,21,34
+
+# Arithmetic sequence
+calc arithmetic --sequence 5 3 5
+# Output: Arithmetic Math Result: 5,8,11,14,17
+```
+
+### Coordinate Geometry
+
+```bash
+# Distance between points
+calc distance 0 0 3 4
+# Output: Distance Math Result: 5
+
+# Midpoint
+calc midpoint 0 0 4 4
+# Output: Midpoint Math Result: (2,2)
+
+# Circle area
+calc circlearea 5
+# Output: Circlearea Math Result: 78.53981633974483
+```
+
+### Random Numbers
+
+```bash
+# Random number
+calc random
+# Output: Random Math Result: 0.123456789
+
+# Random integer
+calc randomint 1 100
+# Output: Randomint Math Result: 42
+
+# Seeded random
+calc seed 12345
+calc random
+# Output: Seed Math Result: Seed set to 12345
+# Output: Random Math Result: 0.123456789 (reproducible)
+```
+
+### Modular Arithmetic
+
+```bash
+# Modulo
+calc mod 10 3
+# Output: Mod Math Result: 1
+
+# Modular exponentiation
+calc modpow 2 10 7
+# Output: Modpow Math Result: 2
+
+# Modular inverse
+calc modinv 3 11
+# Output: Modinv Math Result: 4
+```
+
+### Calculus
+
+```bash
+# Derivative
+calc derivative x^2 3
+# Output: Derivative Math Result: 6
+
+# Integral
+calc integrate x^2 0 2
+# Output: Integrate Math Result: 2.666666666666667
+
+# Find root
+calc root x^2-4 1
+# Output: Root Math Result: 2
 ```
 
 ### Number Conversions
